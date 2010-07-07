@@ -39,8 +39,6 @@
 
 #include <vector>
 #include <string>
-
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/shared_ptr.hpp>
 
 //for ROS error messages
@@ -118,7 +116,7 @@ class PostgresqlDatabaseInterface
 
   //! Retreives the list of objects of a certain type from the database
   template <class T>
-    bool getList(boost::ptr_vector<T> &vec, const T& example, std::string where_clause) const;
+    bool getList(std::vector< boost::shared_ptr<T> > &vec, const T& example, std::string where_clause) const;
 
   //! Helper function for getList, separates SQL from (templated) instantiation
   bool getListRawResult(const DBClass *example, std::vector<const DBFieldBase*> &fields, 
@@ -157,14 +155,15 @@ class PostgresqlDatabaseInterface
   //------- general queries that should work regardless of the datatypes actually being used ------
 
   template <class T>
-  bool getList(boost::ptr_vector<T> &vec, const FilterClause clause=FilterClause()) const
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, const FilterClause clause=FilterClause()) const
   {
     T example;
     return getList<T>(vec, example, clause.clause_);
   }
 
   template <class T>
-  bool getList(boost::ptr_vector<T> &vec, const T &example, const FilterClause clause=FilterClause()) const
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, const T &example, 
+	       const FilterClause clause=FilterClause()) const
   {
     return getList<T>(vec, example, clause.clause_);
   }
@@ -215,7 +214,7 @@ class PostgresqlDatabaseInterface
   already.
 */
 template <class T>
-bool PostgresqlDatabaseInterface::getList(boost::ptr_vector<T> &vec, 
+bool PostgresqlDatabaseInterface::getList(std::vector< boost::shared_ptr<T> > &vec, 
 					  const T &example, std::string where_clause) const
 {
   //we will store here the fields to be retrieved retrieve from the database
@@ -240,12 +239,8 @@ bool PostgresqlDatabaseInterface::getList(boost::ptr_vector<T> &vec,
   //parse the raw result and populate the list 
   for (int i=0; i<num_tuples; i++)
   {
-    T* entry = new T;
-    if (!populateListEntry(entry, result, i, fields, column_ids))
-    {
-      delete entry;
-    }
-    else
+    boost::shared_ptr<T> entry(new T);
+    if (populateListEntry(entry.get(), result, i, fields, column_ids))
     {
       vec.push_back(entry);
     }

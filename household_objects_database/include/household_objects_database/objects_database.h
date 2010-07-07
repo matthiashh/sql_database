@@ -69,27 +69,27 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   //! Acquires the next experiment to be executed from the list of tasks in the database
   /*! Also marks it as RUNNING in an atomic fashion, so that it is not acquired by 
    another process.*/
-  virtual bool acquireNextTask(boost::ptr_vector<DatabaseTask> &task);
+  virtual bool acquireNextTask(std::vector< boost::shared_ptr<DatabaseTask> > &task);
 
   //------- helper functions wrapped around the general versions for convenience -------
   //----------------- or for cases where where_clauses are needed ----------------------
 
   //! Gets a list of all the original models in the database
-  bool getOriginalModelsList(boost::ptr_vector<DatabaseOriginalModel> &models) const
+  bool getOriginalModelsList(std::vector< boost::shared_ptr<DatabaseOriginalModel> > &models) const
   {
     DatabaseOriginalModel example;
     return getList<DatabaseOriginalModel>(models, example, "");
   }
 
   //! Gets a list of all the scaled models in the database
-  bool getScaledModelsList(boost::ptr_vector<DatabaseScaledModel> &models) const
+  bool getScaledModelsList(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
   {
     DatabaseScaledModel example;
     return getList<DatabaseScaledModel>(models, example, "");
   }
 
   //! Gets a list of scaled models based on acquisition method
-  bool getScaledModelsByAcquisition(boost::ptr_vector<DatabaseScaledModel> &models, 
+  bool getScaledModelsByAcquisition(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models, 
 				    std::string acquisition_method) const
   {
     std::string where_clause("acquisition_method_name='" + acquisition_method + "'");
@@ -100,7 +100,7 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets a list of scaled models with "experiment_set" true
-  virtual bool getScaledModelsExperimentSet(boost::ptr_vector<DatabaseScaledModel> &models) const
+  virtual bool getScaledModelsExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
   {
     std::string where_clause("original_model_experiment_set='TRUE'");
     DatabaseScaledModel example;
@@ -108,7 +108,7 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets a list of scaled models with "reduced_experiment_set" true
-  virtual bool getScaledModelsReducedExperimentSet(boost::ptr_vector<DatabaseScaledModel> &models) const
+  virtual bool getScaledModelsReducedExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
   {
     std::string where_clause("original_model_reduced_experiment_set='TRUE'");
     DatabaseScaledModel example;
@@ -116,7 +116,7 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets a list of scaled models with "icra_experiment_set" true
-  virtual bool getScaledModelsIcraExperimentSet(boost::ptr_vector<DatabaseScaledModel> &models) const
+  virtual bool getScaledModelsIcraExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
   {
     std::string where_clause("original_model_icra_experiment_set='TRUE'");
     DatabaseScaledModel example;
@@ -137,7 +137,7 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets a list of all models with the requested tags in the database
-  bool getModelsListByTags(boost::ptr_vector<DatabaseOriginalModel> &models, 
+  bool getModelsListByTags(std::vector< boost::shared_ptr<DatabaseOriginalModel> > &models, 
 			   std::vector<std::string> tags) const
   {
     DatabaseOriginalModel example;
@@ -152,7 +152,8 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets the list of all the grasps for a scaled model id
-  bool getGrasps(int scaled_model_id, std::string hand_name, boost::ptr_vector<DatabaseGrasp> &grasps) const
+  bool getGrasps(int scaled_model_id, std::string hand_name, 
+		 std::vector< boost::shared_ptr<DatabaseGrasp> > &grasps) const
   {
     DatabaseGrasp example;
     std::stringstream id;
@@ -163,7 +164,8 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
   }
 
   //! Gets the list of only those grasps that are cluster reps a database model
-  bool getClusterRepGrasps(int scaled_model_id, std::string hand_name, boost::ptr_vector<DatabaseGrasp> &grasps) const
+  bool getClusterRepGrasps(int scaled_model_id, std::string hand_name, 
+			   std::vector< boost::shared_ptr<DatabaseGrasp> > &grasps) const
   {
     DatabaseGrasp example;
     std::stringstream id;
