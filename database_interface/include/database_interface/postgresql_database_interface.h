@@ -91,7 +91,7 @@ void operator>>(const YAML::Node& node, PostgresqlDatabaseConfig &options)
 
 class PostgresqlDatabaseInterface
 {
- private:
+ protected:
   void pgMDBconstruct(std::string host, std::string port, std::string user,
                       std::string password, std::string dbname );
 
