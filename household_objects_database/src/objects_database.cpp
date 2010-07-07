@@ -44,11 +44,11 @@ using namespace database_interface;
 
 namespace household_objects_database {
 
-bool ObjectsDatabase::acquireNextTask(boost::ptr_vector<DatabaseTask> &task)
+bool ObjectsDatabase::acquireNextTask(std::vector< boost::shared_ptr<DatabaseTask> > &task)
 {
   //first get and mark (atomically) the task id
   DatabaseTaskID id_example;
-  boost::ptr_vector<DatabaseTaskID> id_vec;
+  std::vector< boost::shared_ptr<DatabaseTaskID> > id_vec;
   if ( !getList<DatabaseTaskID>(id_vec, id_example, "") )
   {
     ROS_ERROR("Failed to get the id of the next task to be run");
@@ -65,7 +65,7 @@ bool ObjectsDatabase::acquireNextTask(boost::ptr_vector<DatabaseTask> &task)
     return false;
   }
   //get the actual task id
-  int id = id_vec[0].id_.get();
+  int id = id_vec[0]->id_.get();
   //fill in the rest
   if (!getList<DatabaseTask>(task, dbField("id_")==id ) || task.size() != 1 )
   {

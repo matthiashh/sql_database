@@ -75,7 +75,7 @@ class DBClass
   //! The address of the field that acts as a primary key 
   DBFieldBase* primary_key_field_;
 
-  //! The addressed of all the other fields
+  //! The addresses of all the other fields
   std::vector<DBFieldBase*> fields_;
 
   //! List of foreign keys in OTHER tables that reference our PRIMARY KEY
