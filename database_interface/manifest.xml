@@ -1,0 +1,19 @@
+<package>
+  <description brief="database_interface">
+
+     database_interface
+
+  </description>
+  <author>Matei Ciocarlie and Lorenz Mosenlechner</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/database_interface</url>
+
+  <sysdepend os="ubuntu" version="8.04-hardy" package="libpq-dev"/>
+
+  <depend package="roscpp" />
+  <depend package="yaml_cpp" />
+
+</package>
+
+
