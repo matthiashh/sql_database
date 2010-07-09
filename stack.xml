@@ -3,5 +3,9 @@
   <author>Maintained by Matei Ciocarlie</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/</url>
+  <url>http://ros.org/wiki/sql_database</url>
+  <depend stack="common" /> <!-- yaml_cpp -->
+  <depend stack="common_msgs" /> <!-- geometry_msgs -->
+  <depend stack="ros" /> <!-- roscpp -->
+
 </stack>
