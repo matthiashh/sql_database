@@ -10,6 +10,7 @@
   <url>http://ros.org/wiki/database_interface</url>
 
   <sysdepend os="ubuntu" version="8.04-hardy" package="libpq-dev"/>
+  <sysdepend os="ubuntu" version="9.10-karmic" package="libpq-dev"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpostgresql_database_interface"/>
