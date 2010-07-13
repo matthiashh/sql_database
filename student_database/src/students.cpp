@@ -101,6 +101,79 @@ public:
   }
 };
 
+class StudentWithPhoto : public database_interface::DBClass
+{
+public:  
+  database_interface::DBField<int> student_id_;
+  database_interface::DBField<std::string> student_first_name_;
+  database_interface::DBField<std::string> student_last_name_;
+  database_interface::DBField< std::vector<std::string> > student_majors_;
+  database_interface::DBField<double> student_gpa_;
+  database_interface::DBField< std::vector<char> > student_photo_;
+  
+  StudentWithPhoto() : 
+    student_id_(database_interface::DBFieldBase::TEXT, 
+		this, "student_id", "student", true),
+    student_first_name_(database_interface::DBFieldBase::TEXT, 
+			this, "student_first_name", "student", true),
+    student_last_name_(database_interface::DBFieldBase::TEXT, 
+		       this, "student_last_name", "student", true),
+    student_majors_(database_interface::DBFieldBase::TEXT, 
+		    this, "student_majors", "student", true),
+    student_gpa_(database_interface::DBFieldBase::TEXT, 
+		 this, "student_gpa", "student", true),
+    student_photo_(database_interface::DBFieldBase::BINARY, 
+		 this, "student_photo", "student", true)
+  {
+    primary_key_field_ = &student_id_;
+
+    fields_.push_back(&student_first_name_);
+    fields_.push_back(&student_last_name_);
+    fields_.push_back(&student_majors_);
+    fields_.push_back(&student_gpa_);
+    fields_.push_back(&student_photo_);
+
+    setAllFieldsReadFromDatabase(true);
+    setAllFieldsWriteToDatabase(true);
+
+    student_photo_.setReadFromDatabase(false);
+    student_photo_.setWriteToDatabase(false);
+  }
+};
+
+
+class GradeWithSequence : public database_interface::DBClass
+{
+public:
+  database_interface::DBField<int> grade_id_;
+  database_interface::DBField<int> student_id_;
+  database_interface::DBField<std::string> grade_subject_;
+  database_interface::DBField<double> grade_grade_;
+
+  GradeWithSequence() :
+    grade_id_(database_interface::DBFieldBase::TEXT, 
+		this, "grade_id", "grade", true),
+    student_id_(database_interface::DBFieldBase::TEXT, 
+		this, "student_id", "grade", true),
+    grade_subject_(database_interface::DBFieldBase::TEXT, 
+		   this, "grade_subject", "grade", true),
+    grade_grade_(database_interface::DBFieldBase::TEXT, 
+		 this, "grade_grade", "grade", true)  
+  {
+    primary_key_field_ = &grade_id_;
+    fields_.push_back(&student_id_);
+    fields_.push_back(&grade_subject_);
+    fields_.push_back(&grade_grade_);
+
+    setAllFieldsReadFromDatabase(true);
+    setAllFieldsWriteToDatabase(true);
+
+    grade_id_.setSequenceName("grade_id_seq");
+    grade_id_.setWriteToDatabase(false);
+  }
+};
+
+
 #include <boost/shared_ptr.hpp>
 #include <database_interface/postgresql_database_interface.h>
 
@@ -152,6 +225,16 @@ int main(int argc, char **argv)
   else
     std::cerr << "Grade modified successfully\n";
 
+  //we have forgotten a grade
+  grades[0]->grade_grade_.data() = 0.0;
+  //reload it from the database
+  if (!database.loadFromDatabase( &(grades[0]->grade_grade_) ) )
+    std::cerr << "Failed to load grade field from database\n";
+  else
+    std::cerr << "Grade field (re)loaded, its value is "
+              << grades[0]->grade_grade_.data() 
+              << "\n";
+
   Grade new_grade;
   new_grade.student_id_.data() = 1;
   new_grade.grade_subject_.data() = "astrology";
@@ -161,6 +244,26 @@ int main(int argc, char **argv)
     std::cerr << "Grade insertion failed\n";
   else 
     std::cerr << "Grade insertion succeeded\n";
+
+  //get the students, but photos will not be loaded by default
+  std::vector< boost::shared_ptr<StudentWithPhoto> > students_with_photos;
+  database.getList(students_with_photos);
+
+  //now get the photo for the first student retrieved
+  database.loadFromDatabase( &(students_with_photos[0]->student_photo_) );
+  std::cerr << "The photo has " 
+	    << students_with_photos[0]->student_photo_.data().size() 
+	    << " bytes \n";
+
+  //insert a grade with automatic key generation
+  GradeWithSequence new_grade_seq;
+  new_grade_seq.student_id_.data() = 2;
+  new_grade_seq.grade_subject_.data() = "mythology";
+  new_grade_seq.grade_grade_.data() = 4.0;
+  database.insertIntoDatabase(&new_grade_seq);
+  std::cerr << "The newly inserted grade was assigned grade_id=" 
+	    << new_grade_seq.grade_id_.data() 
+	    << "\n";
 
   return 0;
 }
