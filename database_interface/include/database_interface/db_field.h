@@ -318,6 +318,10 @@ class DBFieldData : public DBFieldBase
 
   T& get() {return data_;}
 
+  const T& data() const {return data_;}
+
+  T& data() {return data_;}
+
   virtual bool fromString(const std::string &str)
   {
     return DBStreamable<T>::streamableFromString(this->data_, str);
