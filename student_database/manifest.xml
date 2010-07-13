@@ -1,0 +1,15 @@
+<package>
+  <description brief="student_database">
+
+     student_database
+
+  </description>
+  <author>Matei Ciocarlie</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/student_database</url>
+  <depend package="database_interface"/>
+
+</package>
+
+
