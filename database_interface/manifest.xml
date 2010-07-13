@@ -2,8 +2,9 @@
   <description brief="database_interface">
 
     Provides an easy to use and general interface between a SQL
-    database and object-oriented C++ code, where an entry (row) in the
-    database corresponds to an instance of a user-defined class.
+    database and object-oriented C++ code, making it easy to
+    encapsulate the conceptual "objects" contained in the database as
+    C++ classes.
 
   </description>
   <author>Matei Ciocarlie and Lorenz Mosenlechner</author>
