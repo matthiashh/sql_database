@@ -154,16 +154,34 @@ class PostgresqlDatabaseInterface
 
   //------- general queries that should work regardless of the datatypes actually being used ------
 
+  //------- retrieval without examples ------- 
   template <class T>
-  bool getList(std::vector< boost::shared_ptr<T> > &vec, const FilterClause clause=FilterClause()) const
+  bool getList(std::vector< boost::shared_ptr<T> > &vec) const
+  {
+    T example;
+    return getList<T>(vec, example, "");
+  }
+  template <class T>
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, const FilterClause clause) const
   {
     T example;
     return getList<T>(vec, example, clause.clause_);
   }
-
   template <class T>
-  bool getList(std::vector< boost::shared_ptr<T> > &vec, const T &example, 
-	       const FilterClause clause=FilterClause()) const
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, std::string where_clause) const
+  {
+    T example;
+    return getList<T>(vec, example, where_clause);
+  }
+
+  //------- retrieval with examples ------- 
+  template <class T>
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, const T &example) const
+  {
+    return getList<T>(vec, example, "");
+  }
+  template <class T>
+  bool getList(std::vector< boost::shared_ptr<T> > &vec, const T &example, const FilterClause clause) const
   {
     return getList<T>(vec, example, clause.clause_);
   }
