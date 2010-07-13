@@ -1,7 +1,9 @@
 <package>
   <description brief="database_interface">
 
-     database_interface
+    Provides an easy to use and general interface between a SQL
+    database and object-oriented C++ code, where an entry (row) in the
+    database corresponds to an instance of a user-defined class.
 
   </description>
   <author>Matei Ciocarlie and Lorenz Mosenlechner</author>
