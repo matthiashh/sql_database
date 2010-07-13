@@ -1,5 +1,7 @@
 <stack>
-  <description brief="ros_database">ros_database</description>
+  <description brief="sql_database">
+    Provides an easy way to use SQL databases from the ROS environment.
+  </description>
   <author>Maintained by Matei Ciocarlie</author>
   <license>BSD</license>  
   <review status="unreviewed" notes=""/>
