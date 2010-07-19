@@ -3,4 +3,4 @@ model_database:
   database_port: 5432
   database_user: willow
   database_pass: willow
-  database_name: models
+  database_name: household_objects
