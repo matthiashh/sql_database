@@ -13,6 +13,7 @@
 
   <depend package="database_interface"/>
   <depend package="roscpp"/>
+  <depend package="geometric_shapes_msgs"/>
   <depend package="geometry_msgs"/>
 
   <export>

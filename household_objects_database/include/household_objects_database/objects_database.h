@@ -40,11 +40,14 @@
 //for ROS error messages
 #include <ros/ros.h>
 
+#include <geometric_shapes_msgs/Shape.h>
+
 #include <database_interface/postgresql_database_interface.h>
 
 #include "household_objects_database/database_original_model.h"
 #include "household_objects_database/database_scaled_model.h"
 #include "household_objects_database/database_grasp.h"
+#include "household_objects_database/database_mesh.h"
 
 namespace household_objects_database {
 
@@ -174,6 +177,51 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
 			     " AND hand_name='" + hand_name + "'" + 
 			     " AND grasp_cluster_rep=true");
     return getList<DatabaseGrasp>(grasps, example, where_clause);
+  }
+
+  //! Gets  the mesh for a scaled model
+  bool getScaledModelMesh(int scaled_model_id, DatabaseMesh &mesh) const
+  {
+    //first get the original model id
+    DatabaseScaledModel scaled_model;
+    scaled_model.id_.data() = scaled_model_id;
+    if (!loadFromDatabase(&scaled_model.original_model_id_))
+    {
+      ROS_ERROR("Failed to get original model for scaled model id %d", scaled_model_id);
+      return false;
+    }
+    mesh.id_.data() = scaled_model.original_model_id_.data();
+    if ( !loadFromDatabase(&mesh.triangles_) ||
+	 !loadFromDatabase(&mesh.vertices_) )
+    {
+      ROS_ERROR("Failed to load mesh from database for scaled model %d, resolved to original model %d",
+		scaled_model_id, mesh.id_.data());
+      return false;
+    }
+    return true;
+  }
+
+  //! Gets the mesh for a scaled model as a geometric_shapes_msgs::Shape
+  bool getScaledModelMesh(int scaled_model_id, geometric_shapes_msgs::Shape &shape) const
+  {
+    DatabaseMesh mesh;
+    if ( !getScaledModelMesh(scaled_model_id, mesh) ) return false;
+    shape.triangles = mesh.triangles_.data();
+    shape.vertices.clear();
+    if ( mesh.vertices_.data().size() % 3 != 0 )
+    {
+      ROS_ERROR("Get scaled model mesh: size of vertices vector is not a multiple of 3");
+      return false;
+    }
+    for (size_t i=0; i<mesh.vertices_.data().size()/3; i++)
+    {
+      geometry_msgs::Point p;
+      p.x = mesh.vertices_.data().at(3*i+0);
+      p.y = mesh.vertices_.data().at(3*i+1);
+      p.z = mesh.vertices_.data().at(3*i+2);
+      shape.vertices.push_back(p);
+    }
+    return true;
   }
 };
 
