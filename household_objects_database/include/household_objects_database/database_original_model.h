@@ -55,24 +55,12 @@ class DatabaseOriginalModel : public database_interface::DBClass
   //fields from the original_model table
   database_interface::DBField<std::string> model_;
   database_interface::DBField<std::string> maker_;
-  database_interface::DBField<double> approximate_radius_;
-  database_interface::DBField<double> grasping_rescale_;
   database_interface::DBField< std::vector<std::string> > tags_;
   database_interface::DBField<std::string> source_;
   database_interface::DBField<std::string> description_;
   database_interface::DBField<std::string> barcode_;
   database_interface::DBField<std::string> acquisition_method_;
   database_interface::DBField<bool> concave_filled_;
-  database_interface::DBField<bool> experiment_set_;
-  //fields from the geometry table
-  database_interface::DBField<std::string> geometry_path_dae_;
-  database_interface::DBField<std::string> geometry_path_x3d_;
-  database_interface::DBField<std::string> geometry_path_;
-  database_interface::DBField<std::string> geometry_thumbnail_path_;
-  database_interface::DBField< std::vector<char> > geometry_binary_dae_;
-  database_interface::DBField< std::vector<char> > geometry_binary_x3d_;
-  database_interface::DBField< std::vector<char> > geometry_binary_ply_;
-  database_interface::DBField< std::vector<char> > geometry_thumbnail_binary_png_;
 
   //! Places all the fields in the fields_ vector and sets foreign keys and sequences
   /*! Note that:
@@ -89,26 +77,12 @@ class DatabaseOriginalModel : public database_interface::DBClass
     //and the rest of the fields
     fields_.push_back(&model_);
     fields_.push_back(&maker_);
-    fields_.push_back(&approximate_radius_);
-    fields_.push_back(&grasping_rescale_);
     fields_.push_back(&tags_);
     fields_.push_back(&source_);
     fields_.push_back(&description_);
     fields_.push_back(&barcode_);
     fields_.push_back(&acquisition_method_);
     fields_.push_back(&concave_filled_);
-    fields_.push_back(&experiment_set_);
-    fields_.push_back(&geometry_path_dae_);
-    fields_.push_back(&geometry_path_x3d_);
-    fields_.push_back(&geometry_path_);
-    fields_.push_back(&geometry_thumbnail_path_);
-    fields_.push_back(&geometry_binary_dae_);
-    fields_.push_back(&geometry_binary_x3d_);
-    fields_.push_back(&geometry_binary_ply_);
-    fields_.push_back(&geometry_thumbnail_binary_png_);
-
-    //foreign keys
-    foreign_keys_.insert( std::pair<std::string, database_interface::DBFieldBase*>("geometry", &id_) );
     
     //sequences
     id_.setSequenceName("unscaled_model_unscaled_model_id_seq");
@@ -132,16 +106,10 @@ class DatabaseOriginalModel : public database_interface::DBClass
     //others that only sync to instance (we don't save them by default, but we try to retrieve them)
     tags_.setReadFromDatabase(true);
     barcode_.setReadFromDatabase(true);
-    //concave_filled_.setReadFromDatabase(true);
-    experiment_set_.setReadFromDatabase(true);
-    geometry_path_dae_.setReadFromDatabase(true);
-    geometry_path_x3d_.setReadFromDatabase(true);
-    geometry_path_.setReadFromDatabase(true);
     //the rest sync both ways; we'll put here those that have a NOT NULL constraint in the database
     model_.setReadWrite(true);
     maker_.setReadWrite(true);
     source_.setReadWrite(true);
-    grasping_rescale_.setReadWrite(true);
     acquisition_method_.setReadWrite(true);
   }
 
@@ -153,28 +121,13 @@ class DatabaseOriginalModel : public database_interface::DBClass
     id_(database_interface::DBFieldBase::TEXT, this, "original_model_id", "original_model", true),
     model_(database_interface::DBFieldBase::TEXT, this, "original_model_model" ,"original_model", true),
     maker_(database_interface::DBFieldBase::TEXT, this, "original_model_maker", "original_model", true),
-    approximate_radius_(database_interface::DBFieldBase::TEXT, this, "original_model_approximate_radius", 
-			"original_model", true),
-    grasping_rescale_(database_interface::DBFieldBase::TEXT, this, "original_model_grasping_rescale", 
-		      "original_model", true),
     tags_(database_interface::DBFieldBase::TEXT, this, "original_model_tags", "original_model", true),
     source_(database_interface::DBFieldBase::TEXT, this, "original_model_source", "original_model", true),
     description_(database_interface::DBFieldBase::TEXT, this, "original_model_description", "original_model", true),
     barcode_(database_interface::DBFieldBase::TEXT, this, "original_model_barcode", "original_model", true),
     acquisition_method_(database_interface::DBFieldBase::TEXT, this, "acquisition_method_name", "original_model", true),
     concave_filled_(database_interface::DBFieldBase::TEXT, this, "original_model_concave_filled", 
-		    "original_model", true),
-    experiment_set_(database_interface::DBFieldBase::TEXT, this, "original_model_experiment_set", 
-		    "original_model", true),
-    geometry_path_dae_(database_interface::DBFieldBase::TEXT, this, "geometry_path_dae", "geometry", true),
-    geometry_path_x3d_(database_interface::DBFieldBase::TEXT, this, "geometry_path_x3d", "geometry", true),
-    geometry_path_(database_interface::DBFieldBase::TEXT, this, "geometry_path", "geometry", true),
-    geometry_thumbnail_path_(database_interface::DBFieldBase::TEXT, this, "geometry_thumbnail_path", "geometry", true),
-    geometry_binary_dae_(database_interface::DBFieldBase::BINARY, this, "geometry_binary_dae", "geometry", true),      
-    geometry_binary_x3d_(database_interface::DBFieldBase::BINARY, this, "geometry_binary_x3d", "geometry", true),      
-    geometry_binary_ply_(database_interface::DBFieldBase::BINARY, this, "geometry_binary_ply", "geometry", true),      
-    geometry_thumbnail_binary_png_(database_interface::DBFieldBase::BINARY, this, "geometry_thumbnail_binary_png", 
-				   "geometry", true)      
+		    "original_model", true)
   {
     initFields();
     initPermissions();
@@ -188,29 +141,16 @@ class DatabaseOriginalModel : public database_interface::DBClass
     id_(this, &other->id_),
     model_(this, &other->model_),
     maker_(this, &other->maker_),
-    approximate_radius_(this, &other->approximate_radius_),
-    grasping_rescale_(this, &other->grasping_rescale_),
     tags_(this, &other->tags_),
     source_(this, &other->source_),
     description_(this, &other->description_),
     barcode_(this, &other->barcode_),
     acquisition_method_(this, &other->acquisition_method_),
-    concave_filled_(this, &other->concave_filled_),
-    experiment_set_(this, &other->experiment_set_),
-    geometry_path_dae_(this, &other->geometry_path_dae_),
-    geometry_path_x3d_(this, &other->geometry_path_x3d_),
-    geometry_path_(this, &other->geometry_path_),
-    geometry_thumbnail_path_(this, &other->geometry_thumbnail_path_),
-    geometry_binary_dae_(this, &other->geometry_binary_dae_),      
-    geometry_binary_x3d_(this, &other->geometry_binary_x3d_),      
-    geometry_binary_ply_(this, &other->geometry_binary_ply_),      
-    geometry_thumbnail_binary_png_(this, &other->geometry_thumbnail_binary_png_)
+    concave_filled_(this, &other->concave_filled_)
       {
 	initFields();
 	//no need to call initPermissions() since field permission are copied over from other
       }
-
-
 };
 
 } //namespace model_database
