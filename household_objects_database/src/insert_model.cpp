@@ -165,7 +165,6 @@ int main(int argc, char **argv)
   //the original model we will insert
   household_objects_database::DatabaseOriginalModel original_model;
 
-  original_model.grasping_rescale_.get() = 1.0;
   original_model.source_.get() = getNonEmptyString("object source");
   original_model.acquisition_method_.get() = getNonEmptyString("acquisition method");
   original_model.maker_.get() = getNonEmptyString("object maker");

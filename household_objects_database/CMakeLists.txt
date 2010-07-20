@@ -32,6 +32,3 @@ rosbuild_genmsg()
 rosbuild_add_library(${PROJECT_NAME} src/objects_database.cpp
                                      src/database_grasp.cpp)
 
-rosbuild_add_executable(insert_model src/insert_model.cpp)
-rosbuild_link_boost (insert_model filesystem system)
-target_link_libraries(insert_model ${PROJECT_NAME})

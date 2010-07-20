@@ -59,12 +59,6 @@ class DatabaseScaledModel : public database_interface::DBClass
   database_interface::DBField< std::vector<std::string> > tags_;
   database_interface::DBField<std::string> source_;
   database_interface::DBField<std::string> acquisition_method_;
-  database_interface::DBField<bool> experiment_set_;
-  //fields from the geometry table
-  database_interface::DBField<std::string> geometry_path_;
-  database_interface::DBField<std::string> geometry_path_x3d_;
-  database_interface::DBField<std::string> geometry_path_dae_;
-  database_interface::DBField<std::string> geometry_thumbnail_path_;
   
  DatabaseScaledModel()  : 
     id_(database_interface::DBFieldBase::TEXT, this, "scaled_model_id", "scaled_model", true),
@@ -75,13 +69,7 @@ class DatabaseScaledModel : public database_interface::DBClass
     maker_(database_interface::DBFieldBase::TEXT, this, "original_model_maker", "original_model", false),
     tags_(database_interface::DBFieldBase::TEXT, this, "original_model_tags", "original_model", false),
     source_(database_interface::DBFieldBase::TEXT, this, "original_model_source", "original_model", false),
-    acquisition_method_(database_interface::DBFieldBase::TEXT, this, "acquisition_method_name", "original_model", false),
-    experiment_set_(database_interface::DBFieldBase::TEXT, this, "original_model_experiment_set", 
-		    "original_model", false),
-    geometry_path_(database_interface::DBFieldBase::TEXT, this, "geometry_path", "geometry", false),
-    geometry_path_x3d_(database_interface::DBFieldBase::TEXT, this, "geometry_path_x3d", "geometry", false),
-    geometry_path_dae_(database_interface::DBFieldBase::TEXT, this, "geometry_path_dae", "geometry", false),
-    geometry_thumbnail_path_(database_interface::DBFieldBase::TEXT, this, "geometry_thumbnail_path", "geometry", false)
+    acquisition_method_(database_interface::DBFieldBase::TEXT, this, "acquisition_method_name", "original_model", false)
   {
     primary_key_field_ = &id_;
     fields_.push_back(&scale_);
@@ -92,11 +80,6 @@ class DatabaseScaledModel : public database_interface::DBClass
     fields_.push_back(&tags_);
     fields_.push_back(&source_);
     fields_.push_back(&acquisition_method_);
-    fields_.push_back(&experiment_set_);
-    fields_.push_back(&geometry_path_);
-    fields_.push_back(&geometry_path_dae_);
-    fields_.push_back(&geometry_path_x3d_);
-    fields_.push_back(&geometry_thumbnail_path_);
 
     setAllFieldsReadFromDatabase(true);
     setAllFieldsWriteToDatabase(false);
@@ -107,7 +90,6 @@ class DatabaseScaledModel : public database_interface::DBClass
     id_.setWriteToDatabase(false);
 
     foreign_keys_.insert( std::pair<std::string, database_interface::DBFieldBase*>("original_model", &original_model_id_) );
-    foreign_keys_.insert( std::pair<std::string, database_interface::DBFieldBase*>("geometry", &original_model_id_) );
   }
 };
 

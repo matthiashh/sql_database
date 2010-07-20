@@ -102,26 +102,13 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
     return getList<DatabaseScaledModel>(models, example, where_clause);
   }
 
-  //! Gets a list of scaled models with "experiment_set" true
-  virtual bool getScaledModelsExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
+  virtual bool getScaledModelsBySet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models,
+				    std::string model_set_name) const
   {
-    std::string where_clause("original_model_experiment_set='TRUE'");
-    DatabaseScaledModel example;
-    return getList<DatabaseScaledModel>(models, example, where_clause);
-  }
-
-  //! Gets a list of scaled models with "reduced_experiment_set" true
-  virtual bool getScaledModelsReducedExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
-  {
-    std::string where_clause("original_model_reduced_experiment_set='TRUE'");
-    DatabaseScaledModel example;
-    return getList<DatabaseScaledModel>(models, example, where_clause);
-  }
-
-  //! Gets a list of scaled models with "icra_experiment_set" true
-  virtual bool getScaledModelsIcraExperimentSet(std::vector< boost::shared_ptr<DatabaseScaledModel> > &models) const
-  {
-    std::string where_clause("original_model_icra_experiment_set='TRUE'");
+    if (model_set_name.empty()) return getScaledModelsList(models);
+    std::string where_clause = std::string("original_model_id IN (SELECT original_model_id FROM "
+					   "model_set WHERE model_set_name = '") + 
+      model_set_name + std::string("')");
     DatabaseScaledModel example;
     return getList<DatabaseScaledModel>(models, example, where_clause);
   }
