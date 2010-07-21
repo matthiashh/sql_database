@@ -1,7 +1,8 @@
 <package>
   <description brief="household_objects_database_msgs">
 
-     household_objects_database_msgs
+    ROS message wrappers for some of the data retrieval functions of
+    the household_objects_database.
 
   </description>
   <author>Matei Ciocarlie</author>
