@@ -13,8 +13,9 @@
 
   <depend package="database_interface"/>
   <depend package="roscpp"/>
-  <depend package="geometric_shapes_msgs"/>
-  <depend package="geometry_msgs"/>
+  <depend package="household_objects_database_msgs"/>
+  <depend package="object_manipulation_msgs"/>
+
 
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lhousehold_objects_database"/>
