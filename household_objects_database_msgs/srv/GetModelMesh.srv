@@ -1,0 +1,12 @@
+# retrieves the mesh for a scaled model id
+
+# the id of the model
+int32 scaled_model_id
+
+---
+
+# the outcome of the query
+DatabaseReturnCode return_code
+
+# the returned mesh
+geometric_shapes_msgs/Shape mesh
