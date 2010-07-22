@@ -1,8 +1,8 @@
-# retrieves all scaled model id's in the database
+# retrieves model id's from the database
 
-# optional: the name of a model set that id's should be retrieved for
+# optional: the name of a model set that the id's should belong to;
 # used to only retrieve a subset of models, pre-specified in the database
-# leave empty to get all models
+# leave empty to get all available models
 string model_set
 
 ---
@@ -11,4 +11,4 @@ string model_set
 DatabaseReturnCode return_code
 
 # the actual model ids
-int32[] scaled_model_ids
+int32[] model_ids
