@@ -1,7 +1,7 @@
-# retrieves the mesh for a scaled model id
+# retrieves the mesh for a model id
 
 # the id of the model
-int32 scaled_model_id
+int32 model_id
 
 ---
 

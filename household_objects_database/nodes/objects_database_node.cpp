@@ -44,12 +44,12 @@
 
 #include <object_manipulation_msgs/GraspPlanning.h>
 
-#include <household_objects_database_msgs/GetScaledModelList.h>
+#include <household_objects_database_msgs/GetModelList.h>
 #include <household_objects_database_msgs/GetModelMesh.h>
 
 #include "household_objects_database/objects_database.h"
 
-const std::string GET_MODELS_SERVICE_NAME = "get_scaled_model_list";
+const std::string GET_MODELS_SERVICE_NAME = "get_model_list";
 const std::string GET_MESH_SERVICE_NAME = "get_model_mesh";
 const std::string GRASP_PLANNING_SERVICE_NAME = "database_grasp_planning";
 
@@ -141,7 +141,7 @@ private:
   ObjectsDatabase *database_;
 
   //! Callback for the get models service
-  bool getModelsCB(GetScaledModelList::Request &request, GetScaledModelList::Response &response)
+  bool getModelsCB(GetModelList::Request &request, GetModelList::Response &response)
   {
     if (!database_)
     {
@@ -156,7 +156,7 @@ private:
     }
     for (size_t i=0; i<models.size(); i++)
     {
-      response.scaled_model_ids.push_back( models[i]->id_.data() );
+      response.model_ids.push_back( models[i]->id_.data() );
     }
     response.return_code.code = response.return_code.SUCCESS;
     return true;
@@ -170,7 +170,7 @@ private:
       response.return_code.code = response.return_code.DATABASE_NOT_CONNECTED;
       return true;
     }
-    if ( !database_->getScaledModelMesh(request.scaled_model_id, response.mesh) )
+    if ( !database_->getScaledModelMesh(request.model_id, response.mesh) )
     {
       response.return_code.code = response.return_code.DATABASE_QUERY_ERROR;
       return true;
