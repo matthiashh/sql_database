@@ -46,12 +46,15 @@
 
 #include <household_objects_database_msgs/GetModelList.h>
 #include <household_objects_database_msgs/GetModelMesh.h>
+#include <household_objects_database_msgs/GetModelDescription.h>
 
 #include "household_objects_database/objects_database.h"
 
 const std::string GET_MODELS_SERVICE_NAME = "get_model_list";
 const std::string GET_MESH_SERVICE_NAME = "get_model_mesh";
+const std::string GET_DESCRIPTION_SERVICE_NAME = "get_model_description";
 const std::string GRASP_PLANNING_SERVICE_NAME = "database_grasp_planning";
+
 
 using namespace household_objects_database_msgs;
 using namespace household_objects_database;
@@ -134,6 +137,9 @@ private:
   //! Server for the get mesh service
   ros::ServiceServer get_mesh_srv_;
 
+  //! Server for the get description service
+  ros::ServiceServer get_description_srv_;
+
   //! Server for the get grasps service
   ros::ServiceServer grasp_planning_srv_;
 
@@ -179,6 +185,30 @@ private:
     return true;
   }
 
+  //! Callback for the get description service
+  bool getDescriptionCB(GetModelDescription::Request &request, GetModelDescription::Response &response)
+  {
+    if (!database_)
+    {
+      response.return_code.code = response.return_code.DATABASE_NOT_CONNECTED;
+      return true;
+    }
+    std::vector< boost::shared_ptr<DatabaseScaledModel> > models;
+    
+    std::stringstream id;
+    id << request.model_id;
+    std::string where_clause("scaled_model_id=" + id.str());
+    if (!database_->getList(models, where_clause) || models.size() != 1)
+    {
+      response.return_code.code = response.return_code.DATABASE_QUERY_ERROR;
+      return true;
+    }
+    response.tags = models[0]->tags_.data();
+    response.name = models[0]->model_.data();
+    response.maker = models[0]->maker_.data();
+    response.return_code.code = response.return_code.SUCCESS;
+    return true;
+  }
 
   //! Prune grasps that require gripper to be open all the way, or that are marked in db as colliding with table
   /*! Use negative value for table_clearance_threshold if no clearing should be done
@@ -213,7 +243,8 @@ private:
     if (!database_)
     {
       ROS_ERROR("Database grasp planning: database not connected");
-      return false;
+      response.error_code.value = response.error_code.OTHER_ERROR;
+      return true;
     }
 
     HandDescription hd;
@@ -225,7 +256,8 @@ private:
     if (!database_->getClusterRepGrasps(model_id, hand_id, grasps))
     {
       ROS_ERROR("Database grasp planning: database query error");
-      return false;
+      response.error_code.value = response.error_code.OTHER_ERROR;
+      return true;
     }
     ROS_INFO("Database object node: retrieved %u grasps from database", (unsigned int)grasps.size());
     
@@ -284,10 +316,11 @@ private:
       grasp.grasp_pose = (*it)->final_grasp_pose_.get().pose_;
 
       //insert the new grasp in the list
-      response.planned_grasps.push_back(grasp);
+      response.grasps.push_back(grasp);
     }
 
-    ROS_INFO("Database grasp planner: returning %u grasps", (unsigned int)response.planned_grasps.size());
+    ROS_INFO("Database grasp planner: returning %u grasps", (unsigned int)response.grasps.size());
+    response.error_code.value = response.error_code.SUCCESS;
     return true;
   }
 
@@ -317,6 +350,8 @@ public:
     //advertise services
     get_models_srv_ = priv_nh_.advertiseService(GET_MODELS_SERVICE_NAME, &ObjectsDatabaseNode::getModelsCB, this);    
     get_mesh_srv_ = priv_nh_.advertiseService(GET_MESH_SERVICE_NAME, &ObjectsDatabaseNode::getMeshCB, this);    
+    get_description_srv_ = priv_nh_.advertiseService(GET_DESCRIPTION_SERVICE_NAME, 
+						     &ObjectsDatabaseNode::getDescriptionCB, this);    
     grasp_planning_srv_ = priv_nh_.advertiseService(GRASP_PLANNING_SERVICE_NAME, 
 						    &ObjectsDatabaseNode::graspPlanningCB, this);
   }
