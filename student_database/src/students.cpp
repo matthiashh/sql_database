@@ -175,11 +175,11 @@ public:
 
 
 #include <boost/shared_ptr.hpp>
-#include <database_interface/postgresql_database_interface.h>
+#include <database_interface/postgresql_database.h>
 
 int main(int argc, char **argv)
 {
-  database_interface::PostgresqlDatabaseInterface 
+  database_interface::PostgresqlDatabase 
     database("wgs36.willowgarage.com", "5432",
 	     "willow", "willow", "students");
   if (!database.isConnected())
