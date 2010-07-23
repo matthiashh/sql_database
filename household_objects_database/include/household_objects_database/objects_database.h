@@ -42,7 +42,7 @@
 
 #include <geometric_shapes_msgs/Shape.h>
 
-#include <database_interface/postgresql_database_interface.h>
+#include <database_interface/postgresql_database.h>
 
 #include "household_objects_database/database_original_model.h"
 #include "household_objects_database/database_scaled_model.h"
@@ -54,17 +54,17 @@ namespace household_objects_database {
 class DatabaseTask;
 
 //! A slight specialization of the general database interface with a few convenience functions added
-class ObjectsDatabase : public database_interface::PostgresqlDatabaseInterface
+class ObjectsDatabase : public database_interface::PostgresqlDatabase
 {
  public:
   //! Attempts to connect to the specified database
   ObjectsDatabase(std::string host, std::string port, std::string user,
 		  std::string password, std::string dbname) 
-    : PostgresqlDatabaseInterface(host, port, user, password, dbname) {}
+    : PostgresqlDatabase(host, port, user, password, dbname) {}
 
   //! Attempts to connect to the specified database
   ObjectsDatabase(const database_interface::PostgresqlDatabaseConfig &config) 
-    : PostgresqlDatabaseInterface(config) {}
+    : PostgresqlDatabase(config) {}
 
   //! Just a stub for now
   ~ObjectsDatabase() {}

@@ -34,7 +34,7 @@
 
 // Author(s): Matei Ciocarlie
 
-#include "database_interface/postgresql_database_interface.h"
+#include "database_interface/postgresql_database.h"
 
 // the header of the libpq library
 #include <libpq-fe.h>
@@ -48,7 +48,7 @@ namespace database_interface {
   PGresult, except that instead of deleting it when it goes out of
   scope, it calls PQclear() on it.
 */
-class PostgresqlDatabaseInterface::PGresultAutoPtr
+class PostgresqlDatabase::PGresultAutoPtr
 {
 private:
   PGresult* result_;
@@ -60,7 +60,7 @@ public:
 };
 
 
-void PostgresqlDatabaseInterface::pgMDBconstruct(std::string host, std::string port, std::string user,
+void PostgresqlDatabase::pgMDBconstruct(std::string host, std::string port, std::string user,
 						 std::string password, std::string dbname )
 {
   std::string conn_info = "host=" + host + " port=" + port + 
@@ -72,33 +72,33 @@ void PostgresqlDatabaseInterface::pgMDBconstruct(std::string host, std::string p
   }
 }
 
-PostgresqlDatabaseInterface::PostgresqlDatabaseInterface(const PostgresqlDatabaseConfig &config)
+PostgresqlDatabase::PostgresqlDatabase(const PostgresqlDatabaseConfig &config)
   : in_transaction_(false)
 {
   pgMDBconstruct(config.getHost(), config.getPort(), config.getUser(), 
                  config.getPassword(), config.getDBname());
 }
 
-PostgresqlDatabaseInterface::PostgresqlDatabaseInterface(std::string host, std::string port, std::string user,
+PostgresqlDatabase::PostgresqlDatabase(std::string host, std::string port, std::string user,
 						 std::string password, std::string dbname )
   : in_transaction_(false)
 {
   pgMDBconstruct(host, port, user, password, dbname);
 }
 
-PostgresqlDatabaseInterface::~PostgresqlDatabaseInterface()
+PostgresqlDatabase::~PostgresqlDatabase()
 {
   PQfinish(connection_);
 }
 
-bool PostgresqlDatabaseInterface::isConnected() const
+bool PostgresqlDatabase::isConnected() const
 {
   if (PQstatus(connection_)==CONNECTION_OK) return true;
   else return false;
 }
 
 /*! Returns true if the rollback query itself succeeds, false if it does not */
-bool PostgresqlDatabaseInterface::rollback()
+bool PostgresqlDatabase::rollback()
 {
   PGresultAutoPtr result((PQexec(connection_,"ROLLBACK;")));
   if (PQresultStatus(*result) != PGRES_COMMAND_OK)
@@ -111,7 +111,7 @@ bool PostgresqlDatabaseInterface::rollback()
 }
 
 /*! Returns true if the begin query itself succeeds, false if it does not */
-bool PostgresqlDatabaseInterface::begin()
+bool PostgresqlDatabase::begin()
 {
   if( in_transaction_ ) return true;
   //place a begin
@@ -126,7 +126,7 @@ bool PostgresqlDatabaseInterface::begin()
 }
 
 /*! Returns true if the commit query itself succeeds, false if it does not */
-bool PostgresqlDatabaseInterface::commit()
+bool PostgresqlDatabase::commit()
 {
   PGresultAutoPtr result(PQexec(connection_, "COMMIT;"));
   if (PQresultStatus(*result) != PGRES_COMMAND_OK)
@@ -138,7 +138,7 @@ bool PostgresqlDatabaseInterface::commit()
   return true;
 }
 
-bool PostgresqlDatabaseInterface::getVariable(std::string name, std::string &value) const
+bool PostgresqlDatabase::getVariable(std::string name, std::string &value) const
 {
   std::string query("SELECT variable_value FROM variable WHERE variable_name=" + name);
   PGresultAutoPtr result(PQexec(connection_, query.c_str()));  
@@ -159,7 +159,7 @@ bool PostgresqlDatabaseInterface::getVariable(std::string name, std::string &val
 /*! The value is returned as a string; caller has to convert it. Returns false if the
   query fails or the sequence is not found.
 */
-bool PostgresqlDatabaseInterface::getSequence(std::string name, std::string &value)
+bool PostgresqlDatabase::getSequence(std::string name, std::string &value)
 {
   std::string query("SELECT * FROM currval('" + name + "');");
   PGresultAutoPtr result( PQexec(connection_, query.c_str()) );
@@ -181,13 +181,13 @@ bool PostgresqlDatabaseInterface::getSequence(std::string name, std::string &val
 /*! Creates and runs the SQL query for retrieveing the list. Has been separated from the
   rest of the getList function so that we can have only the part that instantiates the entries
   separated from the parts that speak SQL, so that we don't have to have SQL in the header
-  of the PostgresqlDatabaseInterface class.
+  of the PostgresqlDatabase class.
 
   See the general getList(...) documentation for more details. This function will run the 
   query, return its raw result, and populate the fields and columns_ids vectors with the fields
   that were retrieved and the columns in the result that they correspond to.
  */
-bool PostgresqlDatabaseInterface::getListRawResult(const DBClass *example, 
+bool PostgresqlDatabase::getListRawResult(const DBClass *example, 
 						   std::vector<const DBFieldBase*> &fields, 
 						   std::vector<int> &column_ids,
 						   std::string where_clause,
@@ -295,7 +295,7 @@ bool PostgresqlDatabaseInterface::getListRawResult(const DBClass *example,
   result, given the list of fields that were retrieved and their respective column ids in
   the result. Helper function for getList(...)
 */
-bool PostgresqlDatabaseInterface::populateListEntry(DBClass *entry, boost::shared_ptr<PGresultAutoPtr> result, 
+bool PostgresqlDatabase::populateListEntry(DBClass *entry, boost::shared_ptr<PGresultAutoPtr> result, 
 						    int row_num,
 						    const std::vector<const DBFieldBase*> &fields,
 						    const std::vector<int> &column_ids) const
@@ -324,7 +324,7 @@ bool PostgresqlDatabaseInterface::populateListEntry(DBClass *entry, boost::share
 
   The counting is performed only on the primary key of the given class.
  */
-bool PostgresqlDatabaseInterface::countList(const DBClass *example, int &count, std::string where_clause) const
+bool PostgresqlDatabase::countList(const DBClass *example, int &count, std::string where_clause) const
 {
   const DBFieldBase* pk_field = example->getPrimaryKeyField();
   
@@ -358,7 +358,7 @@ bool PostgresqlDatabaseInterface::countList(const DBClass *example, int &count, 
 
   TODO: fix this so that we don't always have to join on the primary key.
  */
-bool PostgresqlDatabaseInterface::saveToDatabase(const DBFieldBase* field)
+bool PostgresqlDatabase::saveToDatabase(const DBFieldBase* field)
 {
   if (!field->getWritePermission())
   {
@@ -448,7 +448,7 @@ bool PostgresqlDatabaseInterface::saveToDatabase(const DBFieldBase* field)
   tables are joined based on the primary key which is assumed to be the foreign key in the
   changed field's table. 
  */
-bool PostgresqlDatabaseInterface::loadFromDatabase(DBFieldBase* field) const
+bool PostgresqlDatabase::loadFromDatabase(DBFieldBase* field) const
 {
 
   const DBFieldBase* key_field;
@@ -536,7 +536,7 @@ bool PostgresqlDatabaseInterface::loadFromDatabase(DBFieldBase* field) const
   key, with the value already set correctly. The table that we are inserting in is
   expected to have a foreign key that references the primary key field of our class.
  */
-bool PostgresqlDatabaseInterface::insertIntoTable(std::string table_name,
+bool PostgresqlDatabase::insertIntoTable(std::string table_name,
 						  const std::vector<const DBFieldBase*> &fields)
 {
   if (fields.empty())
@@ -642,7 +642,7 @@ bool PostgresqlDatabaseInterface::insertIntoTable(std::string table_name,
   or have a default value associated with a sequence. In the latter case, the value is retrieved
   after insertion, and set to the primary key field of the instance.
  */
-bool PostgresqlDatabaseInterface::insertIntoDatabase(DBClass* instance)
+bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance)
 {
   //primary key must be text; its table is first
   DBFieldBase* pk_field = instance->getPrimaryKeyField();
@@ -767,7 +767,7 @@ bool PostgresqlDatabaseInterface::insertIntoDatabase(DBClass* instance)
 }
 
 /*! Deletes a row from a table based on the value of the specified field */
-bool PostgresqlDatabaseInterface::deleteFromTable(std::string table_name, const DBFieldBase *key_field)
+bool PostgresqlDatabase::deleteFromTable(std::string table_name, const DBFieldBase *key_field)
 {
   std::string id_str;
   if (!key_field->toString(id_str))
@@ -789,7 +789,7 @@ bool PostgresqlDatabaseInterface::deleteFromTable(std::string table_name, const 
 /*! It removes the entry from the table that holds our primary key, but also from 
   other tables that might hold our fields. Those tables have to be removed first.
 */
-bool PostgresqlDatabaseInterface::deleteFromDatabase(DBClass* instance)
+bool PostgresqlDatabase::deleteFromDatabase(DBClass* instance)
 {
   std::vector<std::string> table_names;
   std::vector<const DBFieldBase*> table_fields;

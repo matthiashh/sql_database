@@ -34,8 +34,8 @@
 
 // Author(s): Matei Ciocarlie
 
-#ifndef _POSTGRESQL_DATABASE_INTERFACE_H_
-#define _POSTGRESQL_DATABASE_INTERFACE_H_
+#ifndef _POSTGRESQL_DATABASE_H_
+#define _POSTGRESQL_DATABASE_H_
 
 #include <vector>
 #include <string>
@@ -87,7 +87,7 @@ void operator>>(const YAML::Node& node, PostgresqlDatabaseConfig &options)
   node["dbname"] >> options.dbname_;
 }
 
-class PostgresqlDatabaseInterface
+class PostgresqlDatabase
 {
  protected:
   void pgMDBconstruct(std::string host, std::string port, std::string user,
@@ -139,15 +139,15 @@ class PostgresqlDatabaseInterface
 
  public:
   //! Attempts to connect to the specified database
-  PostgresqlDatabaseInterface(std::string host, std::string port, std::string user,
-			  std::string password, std::string dbname);
+  PostgresqlDatabase(std::string host, std::string port, std::string user,
+		     std::string password, std::string dbname);
 
   //! Attempts to connect to the specified database
-  PostgresqlDatabaseInterface(const PostgresqlDatabaseConfig &config);
+  PostgresqlDatabase(const PostgresqlDatabaseConfig &config);
 
 
   //! Closes the connection to the database
-  ~PostgresqlDatabaseInterface();
+  ~PostgresqlDatabase();
 
   //! Returns true if the interface is connected to the database and ready to go
   bool isConnected() const;
@@ -232,8 +232,8 @@ class PostgresqlDatabaseInterface
   already.
 */
 template <class T>
-bool PostgresqlDatabaseInterface::getList(std::vector< boost::shared_ptr<T> > &vec, 
-					  const T &example, std::string where_clause) const
+bool PostgresqlDatabase::getList(std::vector< boost::shared_ptr<T> > &vec, 
+				 const T &example, std::string where_clause) const
 {
   //we will store here the fields to be retrieved retrieve from the database
   std::vector<const DBFieldBase*> fields;

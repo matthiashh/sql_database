@@ -38,7 +38,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "database_interface/postgresql_database_interface.h"
+#include "database_interface/postgresql_database.h"
 
 #include "database_interface/database_test_object.h"
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   bool TEST_DELETION = true;
   size_t NUM_OBJECTS = 2;
 
-  database_interface::PostgresqlDatabaseInterface database("wgs36", "5432", "willow", 
+  database_interface::PostgresqlDatabase database("wgs36", "5432", "willow", 
 							   "willow", "database_test");
   if (!database.isConnected())
     {

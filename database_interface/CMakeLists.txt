@@ -61,8 +61,8 @@ endif(NOT HAVE_LIBPQ)
 
 link_directories(${PQ_LIB_DIR})
 include_directories(${PQ_INCLUDE_DIR})
-rosbuild_add_library(postgresql_database_interface src/postgresql_database_interface.cpp)
-target_link_libraries(postgresql_database_interface pq)
+rosbuild_add_library(postgresql_database src/postgresql_database.cpp)
+target_link_libraries(postgresql_database pq)
 
 rosbuild_add_executable(postgresql_interface_test src/postgresql_interface_test.cpp)
-target_link_libraries(postgresql_interface_test postgresql_database_interface)
+target_link_libraries(postgresql_interface_test postgresql_database)
