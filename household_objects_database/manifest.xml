@@ -16,7 +16,12 @@
   <depend package="household_objects_database_msgs"/>
   <depend package="object_manipulation_msgs"/>
 
-
+  <!-- for the register script -->
+  <depend package="rospy"/>
+  <depend package="rosgraph"/>  
+  <depend package="roslib"/>  
+  <depend package="rosservice"/>  
+ 
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lhousehold_objects_database"/>
   </export>
