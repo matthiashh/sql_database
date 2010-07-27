@@ -329,13 +329,13 @@ public:
   {
     //initialize database connection
     std::string database_host, database_port, database_user, database_pass, database_name;
-    root_nh_.param<std::string>("/model_database/database_host", database_host, "");
+    root_nh_.param<std::string>("/household_objects_database/database_host", database_host, "");
     int port_int;
-    root_nh_.param<int>("/model_database/database_port", port_int, -1);
+    root_nh_.param<int>("/household_objects_database/database_port", port_int, -1);
     std::stringstream ss; ss << port_int; database_port = ss.str();
-    root_nh_.param<std::string>("/model_database/database_user", database_user, "");
-    root_nh_.param<std::string>("/model_database/database_pass", database_pass, "");
-    root_nh_.param<std::string>("/model_database/database_name", database_name, "");
+    root_nh_.param<std::string>("/household_objects_database/database_user", database_user, "");
+    root_nh_.param<std::string>("/household_objects_database/database_pass", database_pass, "");
+    root_nh_.param<std::string>("/household_objects_database/database_name", database_name, "");
     database_ = new ObjectsDatabase(database_host, database_port, database_user, database_pass, database_name);
     if (!database_->isConnected())
     {
