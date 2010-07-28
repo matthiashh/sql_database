@@ -33,7 +33,7 @@
 
 NAME="register.py"
 
-import roslib; roslib.load_manifest('rosproxy')
+import roslib; roslib.load_manifest('household_objects_database')
 import roslib.network
 import rosgraph.masterapi
 import rospy
@@ -47,7 +47,7 @@ def register_main():
         parser.error("Please specify /service_name and URI")
     service_name, uri = args
 
-    m = rosgraph.masterapi.Master('rosproxy_register')
+    m = rosgraph.masterapi.Master('database_register')
     # register proxy with URI of port zero. this will create bad info
     # on master, but at least it will accumulate under the same port
     fake_api = 'http://%s:0'%roslib.network.get_host_name()
