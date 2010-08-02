@@ -43,6 +43,8 @@
 
 #include <database_interface/db_class.h>
 
+#include <boost/shared_ptr.hpp>
+
 namespace household_objects_database {
 
 /* Database convention is currently as follows:
@@ -163,6 +165,9 @@ class DatabaseGrasp : public database_interface::DBClass
   //! Empty stub
   ~DatabaseGrasp(){}
 };
+
+
+typedef boost::shared_ptr<DatabaseGrasp> DatabaseGraspPtr;
 
 } //namespace
 
