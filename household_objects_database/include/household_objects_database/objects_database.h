@@ -48,6 +48,11 @@
 #include "household_objects_database/database_scaled_model.h"
 #include "household_objects_database/database_grasp.h"
 #include "household_objects_database/database_mesh.h"
+#include "household_objects_database/database_perturbation.h"
+
+#include <boost/algorithm/string.hpp>
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace household_objects_database {
 
@@ -210,8 +215,32 @@ class ObjectsDatabase : public database_interface::PostgresqlDatabase
     }
     return true;
   }
-};
 
+/*!
+ * These two functions use the ANY(ARRAY[ids]) syntax because those were the most performant in speed tests.
+ */
+  //! Gets the perturbations for all grasps for a given scaled model
+  bool getAllPerturbationsForModel(int scaled_model_id, std::vector<DatabasePerturbationPtr> &perturbations)
+  {
+    std::string where_clause = std::string("grasp_id = ANY(ARRAY(SELECT grasp_id FROM grasp WHERE "
+                                            "scaled_model_id = " + boost::lexical_cast<std::string>(scaled_model_id) +std::string("))"));
+    DatabasePerturbation example;
+    return getList<DatabasePerturbation>(perturbations, example, where_clause);
+  }
+
+  bool getPerturbationsForGrasps(const std::vector<int> &grasp_ids, std::vector<DatabasePerturbationPtr> &perturbations)
+  {
+    std::vector<std::string> grasp_id_strs;
+    grasp_id_strs.reserve(grasp_ids.size());
+    BOOST_FOREACH(int id, grasp_ids) {
+      grasp_id_strs.push_back(boost::lexical_cast<std::string,int>(id));
+    }
+    std::string where_clause = std::string("grasp_id = ANY(ARRAY["+boost::algorithm::join(grasp_id_strs, ", ")+"])");
+    DatabasePerturbation example;
+    return getList<DatabasePerturbation>(perturbations, example, where_clause);
+  }
+};
+typedef boost::shared_ptr<ObjectsDatabase> ObjectsDatabasePtr;
 }//namespace
 
 #endif
