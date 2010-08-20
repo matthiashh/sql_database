@@ -9,7 +9,5 @@
   <depend stack="common" /> <!-- yaml_cpp -->
   <depend stack="common_msgs" /> <!-- geometry_msgs -->
   <depend stack="ros" /> <!-- roscpp -->
-  <depend stack="motion_planning_common" /> <!-- geometric_shapes_msgs -->
-  <depend stack="object_manipulation" /> <!-- object_manipulation_msgs -->
 
 </stack>
