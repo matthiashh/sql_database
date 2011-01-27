@@ -78,7 +78,7 @@ public:
 /*!
  *\brief Loads YAML doc into configuration params. Throws YAML::ParserException if keys missing.
  */
-void operator>>(const YAML::Node& node, PostgresqlDatabaseConfig &options)
+inline void operator>>(const YAML::Node& node, PostgresqlDatabaseConfig &options)
 {
   node["password"] >> options.password_;
   node["user"] >> options.user_;
