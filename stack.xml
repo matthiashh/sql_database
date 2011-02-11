@@ -7,7 +7,7 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/sql_database</url>
   <depend stack="common" /> <!-- yaml_cpp -->
-  <depend stack="common_msgs" /> <!-- geometry_msgs -->
-  <depend stack="ros" /> <!-- roscpp -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- roscpp -->
 
 </stack>
