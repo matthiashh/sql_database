@@ -159,7 +159,11 @@ std::istream& operator >> (std::istream &iss, std::vector<V> &vec)
 {
   char c;
   iss >> c;
-  if (iss.eof()) return iss;
+  if (iss.eof()) 
+  {
+    iss.clear();
+    return iss;
+  }
   if (iss.fail() || c != '{') 
   {
     iss.clear(std::ios::failbit);
