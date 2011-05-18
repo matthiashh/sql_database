@@ -74,7 +74,7 @@ class DBFieldBase
  private:
   //! Makes the class non-assignable, since deep copies are hard because of the owner_ field. 
   /*! Use the assignment operator of the DBClass instead, which reasons about this.*/
-  const DBFieldBase operator = (const DBFieldBase &rhs);
+  const DBFieldBase& operator = (const DBFieldBase &rhs);
  public:
   /*! A field marked as TEXT will be serialized to / from string by calling the toString and
     fromString functions. A field marked as BINARY will be serialized to / from binary
