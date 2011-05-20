@@ -311,7 +311,8 @@ bool PostgresqlDatabase::populateListEntry(DBClass *entry, boost::shared_ptr<PGr
     }
     if ( !entry_field->fromString(char_value) )
     {
-      ROS_ERROR("Database get list: failed to parse response %s", char_value);
+      ROS_ERROR("Database get list: failed to parse response \"%s\" for field \"%s\"",   
+                char_value, fields[t]->getName().c_str()); 
       return false;
     }
   }
@@ -450,8 +451,7 @@ bool PostgresqlDatabase::saveToDatabase(const DBFieldBase* field)
  */
 bool PostgresqlDatabase::loadFromDatabase(DBFieldBase* field) const
 {
-
-  const DBFieldBase* key_field;
+  const DBFieldBase* key_field = NULL;
   if (field->getTableName() == field->getOwner()->getPrimaryKeyField()->getTableName())
   {
     key_field = field->getOwner()->getPrimaryKeyField();
@@ -506,7 +506,8 @@ bool PostgresqlDatabase::loadFromDatabase(DBFieldBase* field) const
   {
     if ( !field->fromString(result_char) )
     {
-      ROS_ERROR("Database load field: failed to parse text result %s", result_char);
+      ROS_ERROR("Database load field: failed to parse text result \"%s\" for field \"%s\"", 
+                result_char, field->getName().c_str()); 
       return false;
     }
   } 
@@ -515,7 +516,8 @@ bool PostgresqlDatabase::loadFromDatabase(DBFieldBase* field) const
     size_t length = PQgetlength(*result, 0, 0);
     if (!field->fromBinary(result_char, length))
     {
-      ROS_ERROR("Database load field: failed to parse binary result");
+      ROS_ERROR("Database load field: failed to parse binary result length %d for field \"%s\"",
+                (int) length, field->getName().c_str()); 
       return false;
     }
   }

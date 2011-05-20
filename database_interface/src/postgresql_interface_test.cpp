@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  ROS_INFO("Retrieved %d objects", objects.size());
+  ROS_INFO("Retrieved %zd objects", objects.size());
   if ( objects.size() != NUM_OBJECTS)
   {
     ROS_ERROR("Expected %d objects", (int)NUM_OBJECTS);
@@ -94,12 +94,12 @@ int main(int argc, char **argv)
     
     if (!database.loadFromDatabase(&(objects[i]->binary_field_)) )
     {
-      ROS_ERROR("Failed to load binary field for object %d",i);
+      ROS_ERROR("Failed to load binary field for object %zd", i);
       return -1;
     }
     else
     {
-      ROS_INFO("           Binary field: %d bytes", objects[i]->binary_field_.get().size());
+      ROS_INFO("           Binary field: %zd bytes", objects[i]->binary_field_.get().size());
     }        
   }
 
