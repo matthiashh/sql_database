@@ -12,14 +12,15 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/database_interface</url>
 
-  <rosdep name="libpq-dev"/>
-
   <export>
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpostgresql_database"/>
   </export>
 
   <depend package="roscpp" />
-  <depend package="yaml_cpp" />
+  <depend package="common_rosdeps" />
+
+  <rosdep name="libpq-dev"/>
+  <rosdep name="yaml-cpp" />
 
 </package>
 
