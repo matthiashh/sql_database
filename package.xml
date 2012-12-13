@@ -1,13 +1,14 @@
 <package>
-  <description brief="database_interface">
-
+  <name>sql_database</name>
+  <version>0.3.1</version>
+  <description>
     Provides an easy to use and general interface between a SQL
     database and object-oriented C++ code, making it easy to
     encapsulate the conceptual "objects" contained in the database as
     C++ classes.
-
   </description>
-  <author>Matei Ciocarlie and Lorenz Mosenlechner</author>
+  <maintainer email="matei@willowgarage.com">Matei Ciocarlie</maintainer>
+  <author>Lorenz Mosenlechner</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/database_interface</url>
@@ -16,8 +17,12 @@
     <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpostgresql_database"/>
   </export>
 
-  <depend package="roscpp" />
-  <depend package="common_rosdeps" />
+  <build_depend>roscpp</build_depend>
+  <build_depend>common_rosdeps</build_depend>
+
+  <run_depend>roscpp</run_depend>
+  <run_depend>common_rosdeps</run_depend>
+
 
   <rosdep name="libpq-dev"/>
   <rosdep name="yaml-cpp" />
