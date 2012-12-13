@@ -12,3 +12,4 @@ catkin_package(
 include_directories(database_interface/include)
 
 add_subdirectory(database_interface)
+add_subdirectory(student_database)
