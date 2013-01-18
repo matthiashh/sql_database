@@ -4,11 +4,6 @@ if (NOT PG_CONFIG)
   message(FATAL_ERROR "Couldn't find pg_config. Is libpq installed?")
 endif(NOT PG_CONFIG)
 
-find_package(PkgConfig)
-pkg_check_modules(SQLITE3 REQUIRED sqlite3)
-include_directories(${SQLITE3_INCLUDE_DIRS})
-link_directories(${SQLITE3_LIBRARY_DIRS})
-
 #get the libpq include and lib directories
 execute_process( 
   COMMAND pg_config --includedir
