@@ -10,7 +10,6 @@
   <maintainer email="matei@willowgarage.com">Matei Ciocarlie</maintainer>
   <author>Lorenz Mosenlechner</author>
   <license>BSD</license>
-  <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/database_interface</url>
 
   <export>
