@@ -12,9 +12,7 @@
   <license>BSD</license>
   <url>http://ros.org/wiki/database_interface</url>
 
-  <export>
-    <cpp cflags="-I${prefix}/include" lflags="-Wl,-rpath,${prefix}/lib -L${prefix}/lib -lpostgresql_database"/>
-  </export>
+  <buildtool_depend>catkin</buildtool_depend>
 
   <build_depend>libpq-dev</build_depend>
   <build_depend>roscpp</build_depend>
