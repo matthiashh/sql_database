@@ -36,3 +36,4 @@ target_link_libraries(postgresql_interface_test ${catkin_LIBRARIES})
 
 install(TARGETS postgresql_database LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 install(TARGETS postgresql_interface_test RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
