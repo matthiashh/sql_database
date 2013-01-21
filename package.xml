@@ -22,5 +22,4 @@
   <run_depend>roscpp</run_depend>
   <run_depend>yaml-cpp</run_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
 </package>
