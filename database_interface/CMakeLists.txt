@@ -34,6 +34,7 @@ add_executable(postgresql_interface_test src/postgresql_interface_test.cpp)
 target_link_libraries(postgresql_interface_test postgresql_database)
 target_link_libraries(postgresql_interface_test ${catkin_LIBRARIES})
 
+install(DIRECTORY include/ DESTINATION include)
 install(TARGETS postgresql_database LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
 install(TARGETS postgresql_interface_test RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
