@@ -1,0 +1,32 @@
+<package>
+  <name>.</name>
+  <version>0.3.0</version>
+  <description>Provides an easy way to use SQL databases from the ROS environment.</description>
+  <maintainer email="">Maintained by Matei Ciocarlie</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://ros.org/wiki/sql_database</url>
+  <!-- <url type="bugtracker"></url> -->
+
+  <author>Maintained by Matei Ciocarlie</author>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed to compile this package. -->
+
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>student_database</run_depend>
+  <run_depend>database_interface</run_depend>
+
+  <!-- Dependencies needed only for running tests. -->
+
+
+
+
+
+
+
+</package>
