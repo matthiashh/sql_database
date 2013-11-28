@@ -1,0 +1,13 @@
+<stack>
+  <description brief="sql_database">
+    Provides an easy way to use SQL databases from the ROS environment.
+  </description>
+  <author>Maintained by Matei Ciocarlie</author>
+  <license>BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/sql_database</url>
+  <depend stack="common_rosdeps" /> <!-- common_rosdeps -->
+  <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- roscpp -->
+
+</stack>

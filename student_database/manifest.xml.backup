@@ -1,0 +1,16 @@
+<package>
+  <description brief="student_database">
+
+    Example package for using the database_interface. Contains the
+    code used in the database_interface tutorials.
+
+  </description>
+  <author>Matei Ciocarlie</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/student_database</url>
+  <depend package="database_interface"/>
+
+</package>
+
+
