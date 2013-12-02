@@ -1,8 +1,8 @@
 <package>
-  <name>.</name>
+  <name>sql_database</name>
   <version>0.3.0</version>
   <description>Provides an easy way to use SQL databases from the ROS environment.</description>
-  <maintainer email="">Maintained by Matei Ciocarlie</maintainer>
+  <maintainer email="matei@willowgarage.com">Maintained by Matei Ciocarlie</maintainer>
 
   <license>BSD</license>
 
@@ -22,9 +22,9 @@
   <run_depend>database_interface</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
-
-
-
+  <export>
+ <metapackage/>
+ </export>
 
 
 
