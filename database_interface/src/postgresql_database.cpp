@@ -34,13 +34,14 @@
 
 // Author(s): Matei Ciocarlie
 
-#include "database_interface/postgresql_database.h"
-
+#include "../include/database_interface/postgresql_database.h"
+//#include <database_interface/postgresql_database.h>
 // the header of the libpq library
 #include <libpq-fe.h>
-
 #include <sstream>
 #include <iostream>
+//just for testing purposes
+#include <string>
 
 namespace database_interface {
 

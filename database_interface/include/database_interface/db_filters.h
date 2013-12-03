@@ -42,7 +42,7 @@
 
 #include <string>
 
-#include "database_interface/db_field.h"
+#include "db_field.h"
 
 /** This file contains basic filtering operators for getting a list of
  * instances out of the database. This works by overloading the

@@ -45,8 +45,8 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
-#include "database_interface/db_class.h"
-#include "database_interface/db_filters.h"
+#include "db_class.h"
+#include "db_filters.h"
 
 //A bit of an involved way to forward declare PGconn, which is a typedef
 struct pg_conn;

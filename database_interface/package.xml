@@ -5,7 +5,7 @@
     database and object-oriented C++ code, making it easy to
     encapsulate the conceptual "objects" contained in the database as
     C++ classes.</description>
-  <maintainer email="">Matei Ciocarlie and Lorenz Mosenlechner</maintainer>
+  <maintainer email="matei@willowgarage.com">Matei Ciocarlie and Lorenz Mosenlechner</maintainer>
 
   <license>BSD</license>
 
