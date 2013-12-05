@@ -40,8 +40,6 @@
 #include <libpq-fe.h>
 #include <sstream>
 #include <iostream>
-//just for testing purposes
-#include <string>
 
 namespace database_interface {
 
@@ -204,7 +202,7 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
   }
 
   std::string select_query;
-  select_query += "SELECT " + example->getPrimaryKeyField()->getName() + " ";  
+  select_query += "SELECT " + example->getPrimaryKeyField()->getName() + " ";
   fields.push_back(example->getPrimaryKeyField());
 
   //we will store here the list of tables we will join on
@@ -262,9 +260,14 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
 
   select_query += ";";
 
-  //ROS_INFO("Query: %s", select_query.c_str());
+  ROS_INFO("Query: %s", select_query.c_str());
 
   PGresult* raw_result = PQexec(connection_, select_query.c_str());
+  //debug-stuff
+  ROS_INFO("query led to %s", PQresultErrorMessage(raw_result));
+  ROS_INFO("additional information %s", PQresultErrorField(raw_result,1));
+
+
   result.reset( new PGresultAutoPtr(raw_result) );
   if (PQresultStatus(raw_result) != PGRES_TUPLES_OK)
   {

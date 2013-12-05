@@ -243,6 +243,9 @@ bool PostgresqlDatabase::getList(std::vector< boost::shared_ptr<T> > &vec,
 
   int num_tuples;
   //do all the heavy lifting of querying the database and getting the raw result
+
+
+  getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples);
   if (!getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples))
   {
     return false;
