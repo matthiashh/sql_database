@@ -40,8 +40,7 @@
 #include <libpq-fe.h>
 #include <sstream>
 #include <iostream>
-//just for testing purposes
-#include <string>
+#include <algorithm> //used to find item in a list
 
 namespace database_interface {
 
@@ -844,6 +843,83 @@ bool PostgresqlDatabase::deleteFromDatabase(DBClass* instance)
 
   return true;
 
+}
+
+/*! Listens to a specified channel using the Postgresql LISTEN-function.*/
+bool PostgresqlDatabase::listenToChannel(std::string channel) {
+  //look, if we're already listening to the channel
+  if (std::find(channels_.begin(),channels_.end(),channel) == channels_.end() )
+    {
+      std::string query = "LISTEN " + channel + " ;";
+      PGresultAutoPtr result = PQexec(connection_,query.c_str());
+      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
+          {
+              ROS_WARN("LISTEN command failed: %s", PQerrorMessage(connection_));
+              return false;
+          }
+      ROS_INFO("Now listening to channel \"%s\"",channel.c_str());
+      channels_.push_back(channel);
+      return true;
+    }
+  ROS_INFO("We are already listening to channel \"%s\" - nothing to be done",channel.c_str());
+  return true;
+}
+
+/*! Stops listening to a specified channel using the Postgresql UNLISTEN-function. */
+bool PostgresqlDatabase::unlistenToChannel(std::string channel)
+{
+  std::list<std::string>::iterator it = std::find(channels_.begin(),channels_.end(),channel);
+  if (it != channels_.end() )
+  {
+      std::string query = "UNLISTEN " + channel + " ;";
+      PGresultAutoPtr result = PQexec(connection_,query.c_str());
+      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
+      {
+        ROS_WARN("UNLISTEN command failed: %s", PQerrorMessage(connection_));
+        return false;
+      }
+      ROS_INFO("Now unlistening to channel \"%s\"",channel.c_str());
+      channels_.erase(it);
+      return true;
+    }
+  ROS_INFO("We already aren't listening to channel \"%s\" - nothing to be done",channel.c_str());
+  return true;
+}
+
+bool PostgresqlDatabase::checkNotifies(notification &no) {
+
+  PQconsumeInput(connection_);
+  PGnotify* noti;
+  //noti = PQnotifies(connection_);
+        /* Now check for input */
+      if ((noti = PQnotifies(connection_)) != NULL)
+      {
+          fprintf(stderr,
+                  "ASYNC NOTIFY of '%s' received from backend PID %d\n",
+                  noti->relname, noti->be_pid);
+          PQfreemem(noti);
+      }
+
+
+  std::string relname = "";
+  if (noti != NULL)
+    {
+      relname = noti->relname;
+      std::cout << "Something received";
+    }
+  if (relname == "bla2")
+  {
+    no.channel = noti->relname;
+    no.sending_pid = noti->be_pid;
+    no.payload = noti->extra;
+    PQfreemem(noti);
+    return true;
+  }
+  no.channel = "";
+  no.sending_pid = 0;
+  no.payload = "";
+  PQfreemem(noti);
+  return false;
 }
 
 }//namespace
