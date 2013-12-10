@@ -39,6 +39,7 @@
 
 #include <vector>
 #include <string>
+#include <list>
 #include <boost/shared_ptr.hpp>
 
 //for ROS error messages
@@ -48,11 +49,18 @@
 #include "db_class.h"
 #include "db_filters.h"
 
+
 //A bit of an involved way to forward declare PGconn, which is a typedef
 struct pg_conn;
 typedef struct pg_conn PGconn;
 
 namespace database_interface {
+
+struct notification {
+  std::string channel;
+  int sending_pid;
+  std::string payload;
+};
 
 class PostgresqlDatabaseConfig
 {
@@ -101,6 +109,9 @@ class PostgresqlDatabase
 
   // beginTransaction sets this flag. endTransaction clears it.
   bool in_transaction_;
+
+  //! Stores all channels, which the instance listens
+  std::list<std::string> channels_;
 
   //! Gets the text value of a given variable
   bool getVariable(std::string name, std::string &value) const;
@@ -209,6 +220,14 @@ class PostgresqlDatabase
   //! Deletes an instance of a DBClass from the database
   bool deleteFromDatabase(DBClass* instance);
 
+  //! Enables listening to a specified channel
+  bool listenToChannel(std::string channel);
+
+  //! stop listening to a specified channel
+  bool unlistenToChannel(std::string channel);
+
+  //! Checks for a notification
+  bool checkNotify(notification &no);
 };
 
 /*! The datatype T is expected to be derived from DBClass.

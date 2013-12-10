@@ -5,6 +5,7 @@ project(database_interface)
 
 set(ROS_BUILD_TYPE Debug)
 set(CMAKE_BUILD_TYPE Debug)
+
 # Load catkin and all dependencies required for this package
 # TODO: remove all from COMPONENTS that are not catkin packages.
 find_package(catkin REQUIRED COMPONENTS roscpp #common_rosdeps 
