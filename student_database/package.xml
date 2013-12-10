@@ -3,7 +3,7 @@
   <version>0.3.0</version>
   <description>Example package for using the database_interface. Contains the
     code used in the database_interface tutorials.</description>
-  <maintainer email="">Matei Ciocarlie</maintainer>
+  <maintainer email="matei@willowgarage.com">Matei Ciocarlie</maintainer>
 
   <license>BSD</license>
 
@@ -17,9 +17,11 @@
 
   <!-- Dependencies needed to compile this package. -->
   <build_depend>database_interface</build_depend>
+  <build_depend>roscpp</build_depend>
 
   <!-- Dependencies needed after this package is compiled. -->
   <run_depend>database_interface</run_depend>
+  <run_depend>roscpp</run_depend>
 
   <!-- Dependencies needed only for running tests. -->
   <!-- <test_depend>database_interface</test_depend> -->

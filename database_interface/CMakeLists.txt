@@ -104,6 +104,7 @@ catkin_package(
 #    INCLUDE_DIRS include
 #    LIBRARIES database_interface
 )
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(#DIRECTORY include/${PROJECT_NAME}/
+        #DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+        )
 

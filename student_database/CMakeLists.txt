@@ -1,5 +1,15 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(student_database)
+# Load catkin and all dependencies required for this package
+# TODO: remove all from COMPONENTS that are not catkin packages.
+find_package(catkin REQUIRED roscpp database_interface)
+
+# include_directories(include ${Boost_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
+# CATKIN_MIGRATION: removed during catkin migration
+# cmake_minimum_required(VERSION 2.4.6)
+
+# CATKIN_MIGRATION: removed during catkin migration
+# include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 # Set the build type.  Options are:
 #  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
@@ -9,24 +19,56 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 #set(ROS_BUILD_TYPE RelWithDebInfo)
 
-rosbuild_init()
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+# CATKIN_MIGRATION: removed during catkin migration
+# rosbuild_init()
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+#add_message_files(
+#  FILES
+  # TODO: List your msg files here
+#)
 #uncomment if you have defined services
-#rosbuild_gensrv()
+#add_service_files(
+#  FILES
+  # TODO: List your msg files here
+#)
 
 #common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#add_library(${PROJECT_NAME} src/example.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+#
+# CATKIN_MIGRATION: removed during catkin migration
+# rosbuild_add_boost_directories()
+#find_package(Boost REQUIRED COMPONENTS thread)
 
-rosbuild_add_executable(students src/students.cpp)
+
+# catkin_package parameters: http://ros.org/doc/groovy/api/catkin/html/dev_guide/generated_cmake_api.html#catkin-package
+# TODO: fill in what other packages will need to use this package
+catkin_package(
+    #DEPENDS # TODO add dependencies
+    CATKIN_DEPENDS roscpp database_interface
+    #INCLUDE_DIRS # TODO include
+    #LIBRARIES # TODO
+)
+
+#dirty hack, but works for now
+include_directories(#${Boost_INCLUDE_DIRS}
+ ~/catkin_ws/src/sql_database/database_interface/include
+   ${catkin_INCLUDE_DIRS}
+)
+#target_link_libraries(students ${Boost_LIBRARIES})
+#add_executable(example examples/example.cpp)
+
+#add_executable(students src/students.cpp)
+#add_dependencies(students postgresql_database)
+#target_link_libraries(students
+#${catkin_LIBRARIES}
+#postgresql_database
+#)
+## Generate added messages and services with any dependencies listed here
+#generate_messages(
+    #TODO DEPENDENCIES geometry_msgs std_msgs
+#)
+
+

@@ -849,4 +849,67 @@ bool PostgresqlDatabase::deleteFromDatabase(DBClass* instance)
 
 }
 
+/*! Listens to a specified channel using the Postgresql LISTEN-function.*/
+bool PostgresqlDatabase::listenToChannel(std::string channel) {
+  //look, if we're already listening to the channel
+  if (std::find(channels_.begin(),channels_.end(),channel) == channels_.end() )
+    {
+      std::string query = "LISTEN " + channel;
+      PGresultAutoPtr result = PQexec(connection_,query.c_str());
+      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
+          {
+              ROS_WARN("LISTEN command failed: %s", PQerrorMessage(connection_));
+              return false;
+          }
+      ROS_INFO("Now listening to channel \"%s\"",channel.c_str());
+      channels_.push_back(channel);
+      return true;
+    }
+  ROS_INFO("We are already listening to channel \"%s\" - nothing to be done",channel.c_str());
+  return true;
+}
+
+/*! Stops listening to a specified channel using the Postgresql UNLISTEN-function. */
+bool PostgresqlDatabase::unlistenToChannel(std::string channel)
+{
+  std::list<std::string>::iterator it = std::find(channels_.begin(),channels_.end(),channel);
+  if (it != channels_.end() )
+  {
+      std::string query = "UNLISTEN " + channel + " ;";
+      PGresultAutoPtr result = PQexec(connection_,query.c_str());
+      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
+      {
+        ROS_WARN("UNLISTEN command failed: %s", PQerrorMessage(connection_));
+        return false;
+      }
+      ROS_INFO("Now unlistening to channel \"%s\"",channel.c_str());
+      channels_.erase(it);
+      return true;
+    }
+  ROS_INFO("We already aren't listening to channel \"%s\" - nothing to be done",channel.c_str());
+  return true;
+}
+
+/*! Checks for a received NOTIFY and returns it. */
+bool PostgresqlDatabase::checkNotify(notification &no)
+{
+  PGnotify *notify;
+  PQconsumeInput(connection_);
+  if ((notify = PQnotifies(connection_)) != NULL)
+    {
+    no.channel = notify->relname;
+    no.sending_pid = notify->be_pid;
+    no.payload = notify->extra;
+    PQfreemem(notify);
+    return true;
+    } else
+    {
+    no.channel = "";
+    no.sending_pid = 0;
+    no.payload = "";
+    PQfreemem(notify);
+    return false;
+    }
+}
+
 }//namespace
