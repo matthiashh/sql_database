@@ -850,7 +850,7 @@ bool PostgresqlDatabase::listenToChannel(std::string channel) {
   //look, if we're already listening to the channel
   if (std::find(channels_.begin(),channels_.end(),channel) == channels_.end() )
     {
-      std::string query = "LISTEN " + channel + " ;";
+      std::string query = "LISTEN " + channel;
       PGresultAutoPtr result = PQexec(connection_,query.c_str());
       if (PQresultStatus(*result) != PGRES_COMMAND_OK)
           {
@@ -886,40 +886,25 @@ bool PostgresqlDatabase::unlistenToChannel(std::string channel)
   return true;
 }
 
-bool PostgresqlDatabase::checkNotifies(notification &no) {
-
+/*! Checks for a received NOTIFY and returns it. */
+bool PostgresqlDatabase::checkNotify(notification &no)
+{
+  PGnotify   *notify;
   PQconsumeInput(connection_);
-  PGnotify* noti;
-  //noti = PQnotifies(connection_);
-        /* Now check for input */
-      if ((noti = PQnotifies(connection_)) != NULL)
-      {
-          fprintf(stderr,
-                  "ASYNC NOTIFY of '%s' received from backend PID %d\n",
-                  noti->relname, noti->be_pid);
-          PQfreemem(noti);
-      }
-
-
-  std::string relname = "";
-  if (noti != NULL)
+  if ((notify = PQnotifies(connection_)) != NULL)
     {
-      relname = noti->relname;
-      std::cout << "Something received";
-    }
-  if (relname == "bla2")
-  {
-    no.channel = noti->relname;
-    no.sending_pid = noti->be_pid;
-    no.payload = noti->extra;
-    PQfreemem(noti);
+    no.channel = notify->relname;
+    no.sending_pid = notify->be_pid;
+    no.payload = notify->extra;
+    PQfreemem(notify);
     return true;
-  }
-  no.channel = "";
-  no.sending_pid = 0;
-  no.payload = "";
-  PQfreemem(noti);
-  return false;
+    } else
+    {
+    no.channel = "";
+    no.sending_pid = 0;
+    no.payload = "";
+    PQfreemem(notify);
+    return false;
+    }
 }
-
 }//namespace

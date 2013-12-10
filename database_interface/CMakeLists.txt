@@ -82,7 +82,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 #target_link_libraries(example ${PROJECT_NAME})
 
 link_directories(${PQ_LIB_DIR})
-include_directories(${PQ_INCLUDE_DIR})
+include_directories(${PQ_INCLUDE_DIR} ${catkin_INCLUDE_DIRS})
 add_library(postgresql_database src/postgresql_database.cpp)
 target_link_libraries(postgresql_database pq)
 target_link_libraries(postgresql_database yaml-cpp)
@@ -104,6 +104,7 @@ catkin_package(
 #    INCLUDE_DIRS include
 #    LIBRARIES database_interface
 )
-install(DIRECTORY include/${PROJECT_NAME}/
-        DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION})
+install(#DIRECTORY include/${PROJECT_NAME}/
+        #DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+)
 
