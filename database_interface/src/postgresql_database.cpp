@@ -62,8 +62,12 @@ public:
 void PostgresqlDatabase::pgMDBconstruct(std::string host, std::string port, std::string user,
 						 std::string password, std::string dbname )
 {
-  std::string conn_info = "host=" + host + " port=" + port + 
-    " user=" + user + " password=" + password + " dbname=" + dbname;
+  std::string conn_info = "host=" + host + " port=" + port;
+  if (password != "")
+  {
+     conn_info += " user=" + user + " password=" + password;
+  }
+  conn_info += " dbname=" + dbname;
   connection_= PQconnectdb(conn_info.c_str());
   if (PQstatus(connection_)!=CONNECTION_OK) 
   {
