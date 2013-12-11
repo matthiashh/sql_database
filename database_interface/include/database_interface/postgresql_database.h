@@ -125,6 +125,15 @@ class PostgresqlDatabase
   //! Issues the "commit" command to the database
   bool commit();
 
+  //! Retreives the result of a function call in a certain type
+  template <class T>
+  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, const T& example, std::vector<std::string> paramVec) const;
+
+  //! Helper function for callFunction, separates SQL from (templated) instantiation
+  bool callFunctionRawResult(const DBClass *example, std::vector<const DBFieldBase*> &fields,
+                        std::vector<int> &column_ids, std::vector<std::string> paramVec,
+                        boost::shared_ptr<PGresultAutoPtr> &result, int &num_tuples) const;
+
   //! Retreives the list of objects of a certain type from the database
   template <class T>
     bool getList(std::vector< boost::shared_ptr<T> > &vec, const T& example, std::string where_clause) const;
@@ -164,6 +173,15 @@ class PostgresqlDatabase
   bool isConnected() const;
 
   //------- general queries that should work regardless of the datatypes actually being used ------
+
+  //------- calling a user defined function -------
+  template <class T>
+  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, std::vector<std::string> paramVec) const
+  {
+    T example;
+    return callFunction<T>(objVec, example, paramVec);
+  }
+
 
   //------- retrieval without examples ------- 
   template <class T>
@@ -228,7 +246,53 @@ class PostgresqlDatabase
 
   //! Checks for a notification
   bool checkNotify(notification &no);
+
 };
+
+template <class T>
+bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVec,
+                                 const T &example, std::vector<std::string> paramVec) const
+{
+  if (paramVec.size() > 0)
+    {
+      ROS_INFO("Received parameters");
+    } else
+    {
+      ROS_INFO("No parameters");
+    }
+
+  //we will store here the fields to be retrieved retrieve from the database
+  std::vector<const DBFieldBase*> fields;
+  //we will store here their index in the result returned from the database
+  std::vector<int> column_ids;
+  boost::shared_ptr<PGresultAutoPtr> result;
+
+  int num_tuples;
+
+  if (!callFunctionRawResult(&example, fields, column_ids, paramVec, result, num_tuples))
+    {
+      return false;
+    }
+
+  objVec.clear();
+  if (!num_tuples)
+  {
+    return true;
+  }
+
+  //parse the raw result and populate the list
+  for (int i=0; i<num_tuples; i++)
+  {
+    boost::shared_ptr<T> entry(new T);
+    if (populateListEntry(entry.get(), result, i, fields, column_ids))
+    {
+      objVec.push_back(entry);
+    }
+  }
+
+  return true;
+}
+
 
 /*! The datatype T is expected to be derived from DBClass.
 
@@ -263,8 +327,8 @@ bool PostgresqlDatabase::getList(std::vector< boost::shared_ptr<T> > &vec,
   int num_tuples;
   //do all the heavy lifting of querying the database and getting the raw result
 
-
-  getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples);
+    //this should be the reason why it's always executed twice
+  //getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples);
   if (!getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples))
   {
     return false;

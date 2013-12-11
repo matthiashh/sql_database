@@ -182,6 +182,77 @@ bool PostgresqlDatabase::getSequence(std::string name, std::string &value)
   return true;
 }
 
+bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
+                                               std::vector<const DBFieldBase*> &fields,
+                                               std::vector<int> &column_ids,
+                                               std::vector<std::string> paramVec,
+                                               boost::shared_ptr<PGresultAutoPtr> &result,
+                                               int &num_tuples) const
+{
+  ROS_INFO("callFunctionRawResult called");
+  //we cannot handle binary results in here; libpq does not support binary results
+  //for just part of the query, so they all have to be text
+
+  if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
+  {
+    ROS_ERROR("Database get list: can not use binary primary key (%s)",
+              example->getPrimaryKeyField()->getName().c_str());
+    return false;
+  }
+
+  std::string select_query;
+  select_query += "SELECT * FROM ";
+  fields.push_back(example->getPrimaryKeyField());
+  select_query += paramVec.front();
+  select_query += "();";
+
+  //we will check and store here colums we want to receive
+  for (size_t i=0; i<example->getNumFields(); i++)
+  {
+    if (!example->getField(i)->getReadFromDatabase()) continue;
+
+    if (example->getField(i)->getType()==DBFieldBase::BINARY)
+    {
+      ROS_WARN("Database get list: binary field (%s) can not be loaded by default",
+               example->getField(i)->getName().c_str());
+      continue;
+    }
+
+    fields.push_back(example->getField(i));
+  }
+
+
+  ROS_INFO("Query: %s", select_query.c_str());
+
+  PGresult* raw_result = PQexec(connection_, select_query.c_str());
+  result.reset( new PGresultAutoPtr(raw_result) );
+  if (PQresultStatus(raw_result) != PGRES_TUPLES_OK)
+  {
+    ROS_ERROR("Database get list: query failed. Error: %s", PQresultErrorMessage(raw_result));
+    return false;
+  }
+
+  num_tuples = PQntuples(raw_result);
+  if (!num_tuples)
+  {
+    return true;
+  }
+
+  //store the column id's for each field we retrieved
+  for (size_t t=0; t<fields.size(); t++)
+  {
+    int id =  PQfnumber(raw_result, fields[t]->getName().c_str());
+    if (id < 0)
+    {
+      ROS_ERROR("Database get list: column %s missing in result", fields[t]->getName().c_str());
+      return false;
+    }
+    column_ids.push_back(id);
+  }
+  return true;
+  return true;
+}
+
 /*! Creates and runs the SQL query for retrieveing the list. Has been separated from the
   rest of the getList function so that we can have only the part that instantiates the entries
   separated from the parts that speak SQL, so that we don't have to have SQL in the header
@@ -199,6 +270,7 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
 {
   //we cannot handle binary results in here; libpq does not support binary results
   //for just part of the query, so they all have to be text
+
   if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
   {
     ROS_ERROR("Database get list: can not use binary primary key (%s)", 
@@ -207,7 +279,7 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
   }
 
   std::string select_query;
-  select_query += "SELECT " + example->getPrimaryKeyField()->getName() + " ";  
+  select_query += "SELECT " + example->getPrimaryKeyField()->getName() + " ";
   fields.push_back(example->getPrimaryKeyField());
 
   //we will store here the list of tables we will join on
@@ -911,5 +983,6 @@ bool PostgresqlDatabase::checkNotify(notification &no)
     return false;
     }
 }
+
 
 }//namespace
