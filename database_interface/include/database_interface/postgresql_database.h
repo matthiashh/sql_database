@@ -46,9 +46,8 @@
 #include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
-#include "db_class.h"
-#include "db_filters.h"
-
+#include "database_interface/db_class.h"
+#include "database_interface/db_filters.h"
 
 //A bit of an involved way to forward declare PGconn, which is a typedef
 struct pg_conn;
@@ -272,14 +271,6 @@ template <class T>
 bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVec,
                                  const T &example, FunctionCallObj paramVec) const
 {
-  if (paramVec.params.size() > 0)
-    {
-      ROS_INFO("Received parameters");
-    } else
-    {
-      ROS_INFO("No parameters");
-    }
-
   //we will store here the fields to be retrieved retrieve from the database
   std::vector<const DBFieldBase*> fields;
   //we will store here their index in the result returned from the database
@@ -345,9 +336,6 @@ bool PostgresqlDatabase::getList(std::vector< boost::shared_ptr<T> > &vec,
 
   int num_tuples;
   //do all the heavy lifting of querying the database and getting the raw result
-
-    //this should be the reason why it's always executed twice
-  //getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples);
   if (!getListRawResult(&example, fields, column_ids, where_clause, result, num_tuples))
   {
     return false;

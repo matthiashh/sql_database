@@ -34,8 +34,8 @@
 
 // Author(s): Matei Ciocarlie
 
-#include "../include/database_interface/postgresql_database.h"
-//#include <database_interface/postgresql_database.h>
+#include "database_interface/postgresql_database.h"
+
 // the header of the libpq library
 #include <libpq-fe.h>
 #include <sstream>
@@ -279,7 +279,6 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
 {
   //we cannot handle binary results in here; libpq does not support binary results
   //for just part of the query, so they all have to be text
-
   if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
   {
     ROS_ERROR("Database get list: can not use binary primary key (%s)", 
@@ -346,7 +345,7 @@ bool PostgresqlDatabase::getListRawResult(const DBClass *example,
 
   select_query += ";";
 
-  ROS_INFO("Query: %s", select_query.c_str());
+  //ROS_INFO("Query: %s", select_query.c_str());
 
   PGresult* raw_result = PQexec(connection_, select_query.c_str());
   result.reset( new PGresultAutoPtr(raw_result) );
@@ -856,7 +855,6 @@ bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance)
 /*! Deletes a row from a table based on the value of the specified field */
 bool PostgresqlDatabase::deleteFromTable(std::string table_name, const DBFieldBase *key_field)
 {
-
   std::string id_str;
   if (!key_field->toString(id_str))
   {

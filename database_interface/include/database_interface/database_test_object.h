@@ -37,7 +37,7 @@
 #ifndef _DATABASE_TEST_OBJECT_H_
 #define _DATABASE_TEST_OBJECT_H_
 
-#include "db_class.h"
+#include "database_interface/db_class.h"
 
 namespace database_interface {
 

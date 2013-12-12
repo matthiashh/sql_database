@@ -38,9 +38,9 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
-#include "../include/database_interface/postgresql_database.h"
+#include "database_interface/postgresql_database.h"
 
-#include "../include/database_interface/database_test_object.h"
+#include "database_interface/database_test_object.h"
 
 #include <ros/ros.h>
 

@@ -37,7 +37,7 @@
 #ifndef _DB_CLASS_H_
 #define _DB_CLASS_H_
 
-#include "db_field.h"
+#include "database_interface/db_field.h"
 
 namespace database_interface {
 
