@@ -56,7 +56,14 @@ typedef struct pg_conn PGconn;
 
 namespace database_interface {
 
-struct notification {
+//this is passed over to a function called holding all the informations which should be submitted
+struct FunctionCallObj {
+  std::string name;
+  std::vector<std::string> params;
+};
+
+//this is used to pass the information stored in a received notification event
+struct Notification {
   std::string channel;
   int sending_pid;
   std::string payload;
@@ -127,11 +134,11 @@ class PostgresqlDatabase
 
   //! Retreives the result of a function call in a certain type
   template <class T>
-  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, const T& example, std::vector<std::string> paramVec) const;
+  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, const T& example, FunctionCallObj paramVec) const;
 
   //! Helper function for callFunction, separates SQL from (templated) instantiation
   bool callFunctionRawResult(const DBClass *example, std::vector<const DBFieldBase*> &fields,
-                        std::vector<int> &column_ids, std::vector<std::string> paramVec,
+                        std::vector<int> &column_ids, FunctionCallObj paramVec,
                         boost::shared_ptr<PGresultAutoPtr> &result, int &num_tuples) const;
 
   //! Retreives the list of objects of a certain type from the database
@@ -176,7 +183,16 @@ class PostgresqlDatabase
 
   //------- calling a user defined function -------
   template <class T>
-  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, std::vector<std::string> paramVec) const
+  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, std::string func) const
+  {
+    T example;
+    FunctionCallObj paramVec;
+    paramVec.name = func;
+    return callFunction<T>(objVec, example, paramVec);
+  }
+
+  template <class T>
+  bool callFunction(std::vector< boost::shared_ptr<T> > &objVec, FunctionCallObj paramVec) const
   {
     T example;
     return callFunction<T>(objVec, example, paramVec);
@@ -245,15 +261,18 @@ class PostgresqlDatabase
   bool unlistenToChannel(std::string channel);
 
   //! Checks for a notification
-  bool checkNotify(notification &no);
+  bool checkNotify(Notification &no);
+
+  //! Checks for a notification, but idles and exits when we have one
+  bool checkNotifyIdle(Notification &no);
 
 };
 
 template <class T>
 bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVec,
-                                 const T &example, std::vector<std::string> paramVec) const
+                                 const T &example, FunctionCallObj paramVec) const
 {
-  if (paramVec.size() > 0)
+  if (paramVec.params.size() > 0)
     {
       ROS_INFO("Received parameters");
     } else

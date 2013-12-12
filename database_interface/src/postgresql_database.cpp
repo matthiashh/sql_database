@@ -185,11 +185,10 @@ bool PostgresqlDatabase::getSequence(std::string name, std::string &value)
 bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
                                                std::vector<const DBFieldBase*> &fields,
                                                std::vector<int> &column_ids,
-                                               std::vector<std::string> paramVec,
+                                               FunctionCallObj paramVec,
                                                boost::shared_ptr<PGresultAutoPtr> &result,
                                                int &num_tuples) const
 {
-  ROS_INFO("callFunctionRawResult called");
   //we cannot handle binary results in here; libpq does not support binary results
   //for just part of the query, so they all have to be text
 
@@ -203,8 +202,19 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
   std::string select_query;
   select_query += "SELECT * FROM ";
   fields.push_back(example->getPrimaryKeyField());
-  select_query += paramVec.front();
-  select_query += "();";
+  select_query += paramVec.name;
+  select_query += "(";
+
+  //add the parameters given in the FunctionCallObj
+  if (paramVec.params.size() > 0)
+    select_query += paramVec.params[0];
+    for (size_t i=1; i < paramVec.params.size(); i++)
+  {
+    select_query += ", ";
+    select_query += paramVec.params[i];
+  }
+
+  select_query += ");";
 
   //we will check and store here colums we want to receive
   for (size_t i=0; i<example->getNumFields(); i++)
@@ -249,7 +259,6 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
     }
     column_ids.push_back(id);
   }
-  return true;
   return true;
 }
 
@@ -847,6 +856,7 @@ bool PostgresqlDatabase::insertIntoDatabase(DBClass* instance)
 /*! Deletes a row from a table based on the value of the specified field */
 bool PostgresqlDatabase::deleteFromTable(std::string table_name, const DBFieldBase *key_field)
 {
+
   std::string id_str;
   if (!key_field->toString(id_str))
   {
@@ -963,7 +973,7 @@ bool PostgresqlDatabase::unlistenToChannel(std::string channel)
 }
 
 /*! Checks for a received NOTIFY and returns it. */
-bool PostgresqlDatabase::checkNotify(notification &no)
+bool PostgresqlDatabase::checkNotify(Notification &no)
 {
   PGnotify *notify;
   PQconsumeInput(connection_);
@@ -984,5 +994,31 @@ bool PostgresqlDatabase::checkNotify(notification &no)
     }
 }
 
+/*! Checks endless for a notify and just exits, if there's an error of a received notify */
+bool PostgresqlDatabase::checkNotifyIdle(Notification &no)
+{
+  int sock;
+  fd_set input_mask;
+  while (true)
+  {
+      // Sleep until something happens on the connection.
+      sock = PQsocket(connection_);
+      if (sock < 0)
+          break;              /* shouldn't happen */
+
+      FD_ZERO(&input_mask);
+      FD_SET(sock, &input_mask);
+
+      if (select(sock + 1, &input_mask, NULL, NULL, NULL) < 0)
+      {
+          ROS_WARN("Select() on the database connection failed: %s\n", strerror(errno));
+          break;
+      }
+
+      // Check for input
+      if (checkNotify(no)) return true;
+  }
+  return false;
+}
 
 }//namespace
