@@ -39,7 +39,6 @@
 
 #include <vector>
 #include <string>
-#include <list>
 #include <boost/shared_ptr.hpp>
 
 //for ROS error messages
@@ -115,9 +114,6 @@ class PostgresqlDatabase
 
   // beginTransaction sets this flag. endTransaction clears it.
   bool in_transaction_;
-
-  //! Stores all channels, which the instance listens
-  std::list<std::string> channels_;
 
   //! Gets the text value of a given variable
   bool getVariable(std::string name, std::string &value) const;
@@ -262,10 +258,16 @@ class PostgresqlDatabase
   //! Checks for a notification
   bool checkNotify(Notification &no);
 
-  //! Checks for a notification, but idles and exits when we have one
+  //! Checks for a notification, but waits until something on the socket happens
   bool checkNotifyIdle(Notification &no);
 
 };
+
+/*! The datatype T is expected to be derived from DBClass.
+
+  This function can call a database-function with given parameters and is able to
+  retrieve a table in return.
+  */
 
 template <class T>
 bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVec,
@@ -280,9 +282,9 @@ bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVe
   int num_tuples;
 
   if (!callFunctionRawResult(&example, fields, column_ids, paramVec, result, num_tuples))
-    {
-      return false;
-    }
+  {
+    return false;
+  }
 
   objVec.clear();
   if (!num_tuples)
@@ -299,7 +301,6 @@ bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVe
       objVec.push_back(entry);
     }
   }
-
   return true;
 }
 

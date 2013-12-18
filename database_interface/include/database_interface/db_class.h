@@ -83,7 +83,7 @@ class DBClass
   std::map<std::string, DBFieldBase*> foreign_keys_;
 
  public:
-  DBClass() : primary_key_field_(NULL) {}
+  DBClass() : primary_key_field_(NULL)  {}
 
   size_t getNumFields() const {return fields_.size();}
 

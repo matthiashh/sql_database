@@ -40,7 +40,7 @@
 #include <libpq-fe.h>
 #include <sstream>
 #include <iostream>
-#include <algorithm> //used to find item in a list
+#include <algorithm> //used to find item in the vector
 
 namespace database_interface {
 
@@ -63,12 +63,13 @@ public:
 void PostgresqlDatabase::pgMDBconstruct(std::string host, std::string port, std::string user,
 						 std::string password, std::string dbname )
 {
-  std::string conn_info = "host=" + host + " port=" + port;
-  if (password != "")
-  {
-     conn_info += " user=" + user + " password=" + password;
-  }
-  conn_info += " dbname=" + dbname;
+  std::string conn_info;
+  //adding empty strings can cause weird things, as they are not expected to be empty
+  if (!host.empty()) conn_info += "host=" + host;
+  if (!port.empty()) conn_info += " port=" + port;
+  if (!user.empty()) conn_info += " user=" + user;
+  if (!password.empty()) conn_info += " password=" + password;
+  if (!dbname.empty()) conn_info += " dbname=" + dbname;
   connection_= PQconnectdb(conn_info.c_str());
   if (PQstatus(connection_)!=CONNECTION_OK) 
   {
@@ -163,6 +164,7 @@ bool PostgresqlDatabase::getVariable(std::string name, std::string &value) const
 /*! The value is returned as a string; caller has to convert it. Returns false if the
   query fails or the sequence is not found.
 */
+
 bool PostgresqlDatabase::getSequence(std::string name, std::string &value)
 {
   std::string query("SELECT * FROM currval('" + name + "');");
@@ -192,7 +194,7 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
   //we cannot handle binary results in here; libpq does not support binary results
   //for just part of the query, so they all have to be text
 
-  if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
+  if(example->getPrimaryKeyField() && example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
   {
     ROS_ERROR("Database get list: can not use binary primary key (%s)",
               example->getPrimaryKeyField()->getName().c_str());
@@ -207,11 +209,16 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
 
   //add the parameters given in the FunctionCallObj
   if (paramVec.params.size() > 0)
-    select_query += paramVec.params[0];
-    for (size_t i=1; i < paramVec.params.size(); i++)
   {
-    select_query += ", ";
-    select_query += paramVec.params[i];
+    select_query += "'";
+    select_query += paramVec.params[0];
+    select_query += "'";
+    for (size_t i=1; i < paramVec.params.size(); i++)
+    {
+      select_query += ", '";
+      select_query += paramVec.params[i];
+      select_query += "'";
+    }
   }
 
   select_query += ");";
@@ -227,10 +234,11 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
                example->getField(i)->getName().c_str());
       continue;
     }
-
     fields.push_back(example->getField(i));
   }
 
+//  select_query = "SELECT * FROM turtlebot_insert_position('-1'','2','2','2');";
+//  select_query = "SELECT pos_x FRom places where pos_x=1 ;";
 
   ROS_INFO("Query: %s", select_query.c_str());
 
@@ -238,12 +246,12 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
   result.reset( new PGresultAutoPtr(raw_result) );
   if (PQresultStatus(raw_result) != PGRES_TUPLES_OK)
   {
-    ROS_ERROR("Database get list: query failed. Error: %s", PQresultErrorMessage(raw_result));
+    ROS_ERROR("Database call function: query failed. Error: %s", PQresultErrorMessage(raw_result));
     return false;
   }
 
   num_tuples = PQntuples(raw_result);
-  if (!num_tuples)
+  if (!num_tuples || !example->getNumFields())
   {
     return true;
   }
@@ -254,7 +262,7 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
     int id =  PQfnumber(raw_result, fields[t]->getName().c_str());
     if (id < 0)
     {
-      ROS_ERROR("Database get list: column %s missing in result", fields[t]->getName().c_str());
+      ROS_ERROR("Database call function: column %s missing in result", fields[t]->getName().c_str());
       return false;
     }
     column_ids.push_back(id);
@@ -931,42 +939,28 @@ bool PostgresqlDatabase::deleteFromDatabase(DBClass* instance)
 
 /*! Listens to a specified channel using the Postgresql LISTEN-function.*/
 bool PostgresqlDatabase::listenToChannel(std::string channel) {
-  //look, if we're already listening to the channel
-  if (std::find(channels_.begin(),channels_.end(),channel) == channels_.end() )
-    {
-      std::string query = "LISTEN " + channel;
-      PGresultAutoPtr result = PQexec(connection_,query.c_str());
-      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
-          {
-              ROS_WARN("LISTEN command failed: %s", PQerrorMessage(connection_));
-              return false;
-          }
-      ROS_INFO("Now listening to channel \"%s\"",channel.c_str());
-      channels_.push_back(channel);
-      return true;
-    }
-  ROS_INFO("We are already listening to channel \"%s\" - nothing to be done",channel.c_str());
+  std::string query = "LISTEN " + channel;
+  PGresultAutoPtr result = PQexec(connection_,query.c_str());
+  if (PQresultStatus(*result) != PGRES_COMMAND_OK)
+      {
+          ROS_WARN("LISTEN command failed: %s", PQerrorMessage(connection_));
+          return false;
+      }
+  ROS_INFO("Now listening to channel \"%s\"",channel.c_str());
   return true;
 }
 
 /*! Stops listening to a specified channel using the Postgresql UNLISTEN-function. */
 bool PostgresqlDatabase::unlistenToChannel(std::string channel)
 {
-  std::list<std::string>::iterator it = std::find(channels_.begin(),channels_.end(),channel);
-  if (it != channels_.end() )
+  std::string query = "UNLISTEN " + channel + " ;";
+  PGresultAutoPtr result = PQexec(connection_,query.c_str());
+  if (PQresultStatus(*result) != PGRES_COMMAND_OK)
   {
-      std::string query = "UNLISTEN " + channel + " ;";
-      PGresultAutoPtr result = PQexec(connection_,query.c_str());
-      if (PQresultStatus(*result) != PGRES_COMMAND_OK)
-      {
-        ROS_WARN("UNLISTEN command failed: %s", PQerrorMessage(connection_));
-        return false;
-      }
-      ROS_INFO("Now unlistening to channel \"%s\"",channel.c_str());
-      channels_.erase(it);
-      return true;
-    }
-  ROS_INFO("We already aren't listening to channel \"%s\" - nothing to be done",channel.c_str());
+    ROS_WARN("UNLISTEN command failed: %s", PQerrorMessage(connection_));
+    return false;
+  }
+  ROS_INFO("Not listening to channel \"%s\" anymore.",channel.c_str());
   return true;
 }
 
@@ -974,25 +968,28 @@ bool PostgresqlDatabase::unlistenToChannel(std::string channel)
 bool PostgresqlDatabase::checkNotify(Notification &no)
 {
   PGnotify *notify;
+  //check for a notify on the connection
   PQconsumeInput(connection_);
+  //deal with the received object
   if ((notify = PQnotifies(connection_)) != NULL)
-    {
+  {
     no.channel = notify->relname;
     no.sending_pid = notify->be_pid;
     no.payload = notify->extra;
     PQfreemem(notify);
     return true;
-    } else
-    {
+  }
+  else
+  {
     no.channel = "";
     no.sending_pid = 0;
     no.payload = "";
     PQfreemem(notify);
     return false;
-    }
+  }
 }
 
-/*! Checks endless for a notify and just exits, if there's an error of a received notify */
+/*! Checks for a notify and just exits, if there's an error of a received NOTIFY */
 bool PostgresqlDatabase::checkNotifyIdle(Notification &no)
 {
   int sock;
@@ -1000,19 +997,19 @@ bool PostgresqlDatabase::checkNotifyIdle(Notification &no)
   while (true)
   {
       // Sleep until something happens on the connection.
-      sock = PQsocket(connection_);
+      sock = PQsocket(connection_);     
       if (sock < 0)
-          break;              /* shouldn't happen */
-
+      {
+        break;
+      }
       FD_ZERO(&input_mask);
       FD_SET(sock, &input_mask);
 
       if (select(sock + 1, &input_mask, NULL, NULL, NULL) < 0)
       {
-          ROS_WARN("Select() on the database connection failed: %s\n", strerror(errno));
-          break;
+        ROS_WARN("Select() on the database connection failed: %s\n", strerror(errno));
+        break;
       }
-
       // Check for input
       if (checkNotify(no)) return true;
   }
