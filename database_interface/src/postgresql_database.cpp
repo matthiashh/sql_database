@@ -101,6 +101,11 @@ bool PostgresqlDatabase::isConnected() const
   else return false;
 }
 
+void PostgresqlDatabase::reconnect()
+{
+  PQreset(connection_);
+}
+
 /*! Returns true if the rollback query itself succeeds, false if it does not */
 bool PostgresqlDatabase::rollback()
 {
@@ -192,29 +197,36 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
   //we cannot handle binary results in here; libpq does not support binary results
   //for just part of the query, so they all have to be text
 
-  if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
-  {
-    ROS_ERROR("Database get list: can not use binary primary key (%s)",
-              example->getPrimaryKeyField()->getName().c_str());
-    return false;
-  }
+//  if(example->getPrimaryKeyField()->getType() == DBFieldBase::BINARY)
+//  {
+//    ROS_ERROR("Database get list: can not use binary primary key (%s)",
+//              example->getPrimaryKeyField()->getName().c_str());
+//    return false;
+//  }
 
   std::string select_query;
   select_query += "SELECT * FROM ";
   fields.push_back(example->getPrimaryKeyField());
   select_query += paramVec.name;
-  select_query += "(";
+
+
 
   //add the parameters given in the FunctionCallObj
   if (paramVec.params.size() > 0)
+  {
+    select_query += "('";
     select_query += paramVec.params[0];
     for (size_t i=1; i < paramVec.params.size(); i++)
-  {
-    select_query += ", ";
-    select_query += paramVec.params[i];
+    {
+      select_query += "', '";
+      select_query += paramVec.params[i];
+    }
+    select_query += "');";
   }
-
-  select_query += ");";
+  else   //if we call a function without any parameter, we shouldn't make these ''
+  {
+      select_query += "();";
+  }
 
   //we will check and store here colums we want to receive
   for (size_t i=0; i<example->getNumFields(); i++)
@@ -242,11 +254,15 @@ bool PostgresqlDatabase::callFunctionRawResult(const DBClass *example,
     return false;
   }
 
-  num_tuples = PQntuples(raw_result);
-  if (!num_tuples)
+  //check if we have a void result -> one column, one line, no entry
+  if ((PQntuples(raw_result) == 1) && (PQnfields(raw_result) == 1) && PQgetvalue(raw_result,0,0))
   {
+    num_tuples = 0;
     return true;
   }
+
+  //return the number of rows
+  num_tuples = PQntuples(raw_result);
 
   //store the column id's for each field we retrieved
   for (size_t t=0; t<fields.size(); t++)

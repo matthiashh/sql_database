@@ -178,6 +178,9 @@ class PostgresqlDatabase
   //! Returns true if the interface is connected to the database and ready to go
   bool isConnected() const;
 
+  //! Reconnects to the database. For example if the connection is lost
+  void reconnect();
+
   //------- general queries that should work regardless of the datatypes actually being used ------
 
   //------- calling a user defined function -------
@@ -277,7 +280,7 @@ bool PostgresqlDatabase::callFunction(std::vector< boost::shared_ptr<T> > &objVe
   std::vector<int> column_ids;
   boost::shared_ptr<PGresultAutoPtr> result;
 
-  int num_tuples;
+  int num_tuples = 0;
 
   if (!callFunctionRawResult(&example, fields, column_ids, paramVec, result, num_tuples))
     {
